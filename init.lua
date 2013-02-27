@@ -7,7 +7,7 @@ local awful = require("awful")
 local capi = {client = client , tag    = tag    ,
               screen = screen , mouse  = mouse  }
 
-module("tyranic")
+local module = {}
 
 -------------------------------INIT------------------------------
 
@@ -179,4 +179,4 @@ local function setter (table, key,value)
     end
 end
 
-setmetatable(_M, { __call = function(_, ...) return end , __index = getter, __newindex = setter})
+return setmetatable(module, { __call = function(_, ...) return end , __index = getter, __newindex = setter})
