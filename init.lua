@@ -78,6 +78,10 @@ local function match_client(c, startup)
         if rules.properties.floating ~= nil then
             awful.client.floating.set(c, rules.properties.floating)
         end
+        --Center client
+        if rules.properties.centered == true then
+            awful.placement.centered(c, nil)
+        end
         --Set other properties
         for k,v in pairs(rules.properties) do
             c[k] = v
