@@ -82,6 +82,10 @@ local function match_client(c, startup)
         if rules.properties.centered == true then
             awful.placement.centered(c, nil)
         end
+        --Focus new client
+        if rules.properties.focus_on_new == true then
+            c.focus = true
+        end
         --Set other properties
         for k,v in pairs(rules.properties) do
             c[k] = v
