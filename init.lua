@@ -11,7 +11,21 @@ local module = {}
 
 -------------------------------INIT------------------------------
 
-for _,sig in ipairs({"property::exclusive","property::init","property::volatile","property::focus_on_new","property::instances","property::match","property::class"})do
+local signals = {
+  "property::exclusive",
+  "property::init",
+  "property::volatile",
+  "property::focus_on_new",
+  "property::instances",
+  "property::match",
+  "property::class",
+  "property::spawn",
+  "property::position",
+  "property::force_screen",
+  "property::max_clients",
+
+}
+for _,sig in ipairs(signals) do
     capi.tag.add_signal(sig)
 end
 
