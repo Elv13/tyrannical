@@ -2,8 +2,9 @@
 -- Remove last dir
 local pwd = os.getenv("PWD"):match("(.+)/.-")
 package.path = pwd .. "/?.lua;" .. pwd .. "/?/init.lua;" .. package.path
+local tyranical = require("awesome-tyranical")
+
 -- Standard awesome library
-local tyranic = require("awesome-tyranical")
 local gears = require("gears")
 local awful = require("awful")
 awful.rules = require("awful.rules")
@@ -76,7 +77,7 @@ local layouts =
 -- }}}
 
 
-tyranic.tags = {
+tyranical.tags = {
     {
         name = "Term",
         init        = true                                           ,
@@ -352,23 +353,23 @@ tyranic.tags = {
         class       = {"mythfrontend"  , "xbmc"           ,}
     } ,
     }
-tyranic.properties.intrusive = {
+tyranical.properties.intrusive = {
     "ksnapshot"     , "pinentry"       , "gtksu"     , "kcalc"        , "xcalc"           ,
     "feh"           , "Gradient editor", "About KDE" , "Paste Special", "Background color",
     "kcolorchooser" , "plasmoidviewer" , "plasmaengineexplorer" , "Xephyr" , "kruler"     ,
 }
-tyranic.properties.floating = {
+tyranical.properties.floating = {
     "MPlayer"      , "pinentry"        , "ksnapshot"  , "pinentry"     , "gtksu"          ,
     "xine"         , "feh"             , "kmix"       , "kcalc"        , "xcalc"          ,
     "yakuake"      , "Select Color$"   , "kruler"     , "kcolorchooser", "Paste Special"  ,
     "New Form"     , "Insert Picture"  , "kcharselect", "mythfrontend" , "plasmoidviewer" 
 }
 
-tyranic.properties.ontop = {
+tyranical.properties.ontop = {
     "Xephyr"       , "ksnapshot"       , "kruler"
 }
 
-tyranic.properties.size_hints_honor = { xterm = false, URxvt = false, aterm = false, sauer_client = false, mythfrontend  = false}
+tyranical.properties.size_hints_honor = { xterm = false, URxvt = false, aterm = false, sauer_client = false, mythfrontend  = false}
 
 
 -- {{{ Wallpaper
