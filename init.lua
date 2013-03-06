@@ -11,6 +11,9 @@ local module = {}
 
 -------------------------------INIT------------------------------
 
+-- Reset vannilla tags table
+tags = {}
+
 local signals = {
   "property::exclusive",
   "property::init",
@@ -58,11 +61,23 @@ local function load_tags(tyranic_tags)
                 for k2,v2 in pairs(v.screen) do
                     if v2 <= capi.screen.count() then
                         v.screen = v2
-                        v.instances[v2] = awful.tag.add(v.name,v)
+                        local tags = awful.tag.add(v.name,v)
+                        v.instances[v2] = tag
+                        -- Makes vannilla keybinds work
+                        if tags[v2] == nil then
+                            tags[v2] = {}
+                        end
+                        table.insert(tags[v2],tag)
                     end
                 end
             elseif (v.screen or 1) <= capi.screen.count() then
-                v.instances[v.screen or 1] = awful.tag.add(v.name,v)
+                local tag = awful.tag.add(v.name,v)
+                v.instances[v.screen or 1] = tag
+                -- Makes vannilla keybinds work
+                if tags[v.screen or 1] == nil then
+                    tags[v.screen or 1] = {}
+                end
+                table.insert(tags[v.screen or 1],tag)
             end
         elseif v.volatile == nil then
             v.volatile = true
