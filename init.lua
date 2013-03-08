@@ -12,18 +12,10 @@ local module = {}
 -------------------------------INIT------------------------------
 
 local signals = {
-  "property::exclusive",
-  "property::init",
-  "property::volatile",
-  "property::focus_on_new",
-  "property::instances",
-  "property::match",
-  "property::class",
-  "property::spawn",
-  "property::position",
-  "property::force_screen",
-  "property::max_clients",
-
+  "property::exclusive"    , "property::init"       , "property::volatile" ,
+  "property::focus_on_new" , "property::instances"  , "property::match"    ,
+  "property::class"        , "property::spawn"      , "property::position" ,
+  "property::force_screen" , "property::max_clients", "property::exec_once",
 }
 for _,sig in ipairs(signals) do
     capi.tag.add_signal(sig)
@@ -35,13 +27,23 @@ local class_client,matches_client = {},{}
 
 --------------------------TYRANIC LOGIC--------------------------
 
+--Called when a tag is selected/unselected
+local function on_selected_change(tag,data)
+    if data.exec_once and tag.selected and not data._init_done then
+        for k,v in ipairs(type(data.exec_once) == "string" and {data.exec_once} or data.exec_once) do
+            awful.util.spawn(v, false)
+        end
+        data._init_done = true
+    end
+end
+
 --Turn tags -> matches into matches -> tags
 local function fill_tyranic(tab_in,tab_out,value)
     if tab_in and tab_out then
         for i=1,#tab_in do
             local low = string.lower(tab_in[i])
             local tmp = tab_out[low] or {tags={},properties={}}
-            value.instances = value.instances or {}
+            value.instances=  value.instances or {}
             tmp.tags[#tmp.tags+1] = value
             tab_out[low] = tmp
         end
@@ -160,7 +162,7 @@ capi.client.connect_signal("untagged", function (c, t)
 end)
 
 -- awful.tag.withcurrent = function() end --Disable automatic tag insertion
-awful.tag.withcurrent = function(c, startup)
+awful.tag.withcurrent,awful.tag._add  = function(c, startup)
     local tags,old_tags = {},c:tags()
     --Safety to prevent
     for k, t in ipairs(old_tags) do
@@ -178,6 +180,12 @@ awful.tag.withcurrent = function(c, startup)
         end
     end
     c:tags(tags)
+end,awful.tag.add
+
+awful.tag.add = function(tag,props)
+    local t = awful.tag._add(tag,props)
+    t:connect_signal("property::selected", function(t) on_selected_change(t,props) end)
+    return t
 end
 
 --------------------------OBJECT GEARS---------------------------

@@ -110,6 +110,7 @@ tyranical.tags = {
      --   icon        = utils.tools.invertedIconPath("folder.png")     ,
         screen      = 1,--config.data().scr.pri                          ,
         layout      = awful.layout.suit.tile                         ,
+        exec_once   = {"dolphin"}                                    ,
         class  = { 
             "Thunar"        , "Konqueror"      , "Dolphin"   , "ark"          , "Nautilus",         }
     } ,
