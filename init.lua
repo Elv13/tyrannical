@@ -140,7 +140,10 @@ local function match_client(c, startup)
         --TODO post_match
     end
     --Add to the current tag if not exclusive
-    --TODO
+    local cur_tag = awful.tag.selected(c.screen)
+    if awful.tag.getproperty(cur_tag,"exclusive") ~= true then
+        return c:tags({cur_tag})
+    end
     --Last resort, create a new tag
     class_client[low] = class_client[low] or {tags={},properties={}}
     local tmp,tag = class_client[low],awful.tag.add(c.class,{name=c.class,volatile=true,screen=(c.screen <= capi.screen.count()) and c.screen or 1})
