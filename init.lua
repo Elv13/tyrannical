@@ -16,6 +16,7 @@ local signals = {
   "property::focus_on_new" , "property::instances"  , "property::match"    ,
   "property::class"        , "property::spawn"      , "property::position" ,
   "property::force_screen" , "property::max_clients", "property::exec_once",
+  "property::clone_on"     , "property::clone_of"
 }
 for _,sig in ipairs(signals) do
     capi.tag.add_signal(sig)
@@ -122,11 +123,12 @@ local function match_client(c, startup)
             if not tag_tmp.instances[c.screen or 1] then
                 local cache = tag_tmp.screen
                 tag_tmp.screen = tag_tmp.force_screen == true and tag_tmp.screen or c.screen
+                tag_tmp.screen = (tag_tmp.screen <= capi.screen.count()) and tag_tmp.screen or 1
                 c.screen = tag_tmp.screen
-                tag_tmp.instances[c.screen or 1] = awful.tag.add(tag_tmp.name,tag_tmp)
+                tag_tmp.instances[(c.screen <= capi.screen.count()) and tag_tmp.screen or 1] = awful.tag.add(tag_tmp.name,tag_tmp)
                 tag_tmp.screen = cache
             end
-            tags[#tags+1] = tag_tmp.instances[c.screen or 1]
+            tags[#tags+1] = tag_tmp.instances[(c.screen <= capi.screen.count()) and c.screen or 1]
         end
         if #tags > 0 then
             c:tags(tags)
@@ -141,8 +143,8 @@ local function match_client(c, startup)
     --TODO
     --Last resort, create a new tag
     class_client[low] = class_client[low] or {tags={},properties={}}
-    local tmp,tag = class_client[low],awful.tag.add(c.class,{name=c.class,volatile=true,screen=c.screen})
-    tmp.tags[#tmp.tags+1] = {name=c.class,instances = {tag},volatile=true,screen=c.screen}
+    local tmp,tag = class_client[low],awful.tag.add(c.class,{name=c.class,volatile=true,screen=(c.screen <= capi.screen.count()) and c.screen or 1})
+    tmp.tags[#tmp.tags+1] = {name=c.class,instances = {[c.screen]=tag},volatile=true,screen=c.screen}
     c:tags({tag})
     if awful.tag.getproperty(tag,"focus_on_new") ~= false then
         awful.tag.viewonly(tag)
@@ -182,10 +184,38 @@ awful.tag.withcurrent,awful.tag._add  = function(c, startup)
     c:tags(tags)
 end,awful.tag.add
 
-awful.tag.add = function(tag,props)
+awful.tag.add,awful.tag._setscreen = function(tag,props)
     local t = awful.tag._add(tag,props)
+    if awful.tag.getproperty(t,"clone_on") and awful.tag.getproperty(t,"clone_on") ~= t.screen then
+        local t3 = awful.tag._add(tag.."(c)",{screen = awful.tag.getproperty(t,"clone_on"), clone_of = t,icon=awful.tag.geticon(t)})
+        --TODO prevent clients from being added to the clone
+    end
     t:connect_signal("property::selected", function(t) on_selected_change(t,props) end)
     return t
+end,awful.tag.setscreen
+
+awful.tag.setscreen,awful.tag._viewonly = function(tag,screen) --Why this isn't by default...
+    awful.tag.history.restore(tag.screen,1)
+    awful.tag._setscreen(tag,screen)
+    for k,c in ipairs(tag:clients()) do
+        c.screen = screen or 1 --Move all clients
+    end
+end,awful.tag.viewonly
+
+awful.tag.viewonly = function(t)
+    awful.tag._viewonly(t)
+    if awful.tag.getproperty(t,"clone_of") then
+        awful.tag.swap(t,awful.tag.getproperty(t,"clone_of"))
+        awful.tag.viewonly(awful.tag.getproperty(t,"clone_of"))
+    end
+end
+
+awful.tag.swap = function(tag1,tag2)
+    local idx1,idx2,scr2 = awful.tag.getidx(tag1),awful.tag.getidx(tag2),awful.tag.getscreen(tag2)
+    awful.tag.setscreen(tag2,awful.tag.getscreen(tag1))
+    awful.tag.move(idx1,tag2)
+    awful.tag.setscreen(tag1,scr2)
+    awful.tag.move(idx2,tag1)
 end
 
 --------------------------OBJECT GEARS---------------------------
