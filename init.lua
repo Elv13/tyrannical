@@ -110,7 +110,11 @@ local function match_client(c, startup)
         --Add to the current tag if the client is intrusive, ignore exclusive
         if rules.properties.intrusive == true then
             local tag = awful.tag.selected(c.screen)
-            if tag then
+            if not tag then
+                awful.tag.viewonly(awful.tag.gettags(c.screen)[1])
+            end
+            tag = awful.tag.selected(c.screen)
+            if tag then --Can be false if there is no tags
                 c:tags({tag})
                 return
             end
@@ -146,7 +150,7 @@ local function match_client(c, startup)
     end
     --Last resort, create a new tag
     class_client[low] = class_client[low] or {tags={},properties={}}
-    local tmp,tag = class_client[low],awful.tag.add(c.class,{name=c.class,volatile=true,screen=(c.screen <= capi.screen.count()) and c.screen or 1})
+    local tmp,tag = class_client[low],awful.tag.add(c.class,{name=c.class,volatile=true,screen=(c.screen <= capi.screen.count()) and c.screen or 1,layout=awful.layout.suit.max})
     tmp.tags[#tmp.tags+1] = {name=c.class,instances = {[c.screen]=tag},volatile=true,screen=c.screen}
     c:tags({tag})
     if awful.tag.getproperty(tag,"focus_on_new") ~= false then
@@ -190,7 +194,7 @@ end,awful.tag.add
 awful.tag.add,awful.tag._setscreen = function(tag,props)
     local t = awful.tag._add(tag,props)
     if awful.tag.getproperty(t,"clone_on") and awful.tag.getproperty(t,"clone_on") ~= t.screen then
-        local t3 = awful.tag._add(tag.."(c)",{screen = awful.tag.getproperty(t,"clone_on"), clone_of = t,icon=awful.tag.geticon(t)})
+        local t3 = awful.tag._add(tag,{screen = awful.tag.getproperty(t,"clone_on"), clone_of = t,icon=awful.tag.geticon(t)})
         --TODO prevent clients from being added to the clone
     end
     t:connect_signal("property::selected", function(t) on_selected_change(t,props) end)
