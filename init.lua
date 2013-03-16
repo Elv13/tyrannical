@@ -13,7 +13,7 @@ local module = {}
 
 local signals = {
   "property::exclusive"    , "property::init"       , "property::volatile" ,
-  "property::focus_on_new" , "property::instances"  , "property::match"    ,
+  "property::focus_new"    , "property::instances"  , "property::match"    ,
   "property::class"        , "property::spawn"      , "property::position" ,
   "property::force_screen" , "property::max_clients", "property::exec_once",
   "property::clone_on"     , "property::clone_of"
@@ -100,8 +100,8 @@ local function match_client(c, startup)
             awful.placement.centered(c, nil)
         end
         --Focus new client
-        if rules.properties.focus_on_new == true then
-            c.focus = true
+        if rules.properties.focus_new ~= false then
+            c.focus = c
         end
         --Set other properties
         for k,v in pairs(rules.properties) do
@@ -136,7 +136,7 @@ local function match_client(c, startup)
         end
         if #tags > 0 then
             c:tags(tags)
-            if awful.tag.getproperty(tags[1],"focus_on_new") ~= false then
+            if awful.tag.getproperty(tags[1],"focus_new") ~= false then
                 awful.tag.viewonly(tags[1])
             end
             return
@@ -153,9 +153,6 @@ local function match_client(c, startup)
     local tmp,tag = class_client[low],awful.tag.add(c.class,{name=c.class,volatile=true,screen=(c.screen <= capi.screen.count()) and c.screen or 1,layout=awful.layout.suit.max})
     tmp.tags[#tmp.tags+1] = {name=c.class,instances = {[c.screen]=tag},volatile=true,screen=c.screen}
     c:tags({tag})
-    if awful.tag.getproperty(tag,"focus_on_new") ~= false then
-        awful.tag.viewonly(tag)
-    end
 end
 
 capi.client.connect_signal("manage", match_client)
