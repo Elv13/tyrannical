@@ -2,7 +2,7 @@
 -- Remove last dir
 local pwd = os.getenv("PWD"):match("(.+)/.-")
 package.path = pwd .. "/?.lua;" .. pwd .. "/?/init.lua;" .. package.path
-local tyranical = require("awesome-tyranical")
+local tyrannical = require("tyrannical")
 
 -- Standard awesome library
 local gears = require("gears")
@@ -77,300 +77,89 @@ local layouts =
 -- }}}
 
 
-tyranical.tags = {
+tyrannical.tags = {
     {
-        name = "Term",
-        init        = true                                           ,
-        exclusive   = true                                           ,
---        icon        = utils.tools.invertedIconPath("term.png")       ,
-        screen      = 1,-- {config.data().scr.pri, config.data().scr.sec} ,
-        layout      = awful.layout.suit.tile                         ,
-        class       = {
-            "xterm" , "urxvt" , "aterm","URxvt","XTerm"
-        },
-        match       = {
-            "konsole"
+        name        = "Term",                 -- Call the tag "Term"
+        init        = true,                   -- Load the tag on startup
+        exclusive   = true,                   -- Refuse any other type of clients (by classes)
+        screen      = {1,2},                  -- Create this tag on screen 1 and screen 2
+        layout      = awful.layout.suit.tile, -- Use the tile layout
+        class       = { --Accept the following classes, refuse everything else (because of "exclusive=true")
+            "xterm" , "urxvt" , "aterm","URxvt","XTerm","konsole","terminator","gnome-terminal"
         }
     } ,
     {
-        name = "Internet",
-        init        = true                                           ,
-        exclusive   = true                                           ,
-     --   icon        = utils.tools.invertedIconPath("net.png")        ,
-        screen      = 1,--config.data().scr.pri                          ,
-        layout      = awful.layout.suit.max                          ,
+        name        = "Internet",
+        init        = true,
+        exclusive   = true,
+      --icon        = "~net.png",                 -- Use this icon for the tag (uncomment with a real path)
+        screen      = screen.count()>1 and 2 or 1,-- Setup on screen 2 if there is more than 1 screen, else on screen 1
+        layout      = awful.layout.suit.max,      -- Use the max layout
         class = {
             "Opera"         , "Firefox"        , "Rekonq"    , "Dillo"        , "Arora",
-            "Chromium"      , "nightly"        , "Nightly"   , "minefield"    , "Minefield" }
+            "Chromium"      , "nightly"        , "minefield"     }
     } ,
     {
         name = "Files",
-        init        = true                                           ,
-        exclusive   = true                                           ,
-     --   icon        = utils.tools.invertedIconPath("folder.png")     ,
-        screen      = 1,--config.data().scr.pri                          ,
-        layout      = awful.layout.suit.tile                         ,
-        exec_once   = {"dolphin"}                                    ,
-        class  = { 
-            "Thunar"        , "Konqueror"      , "Dolphin"   , "ark"          , "Nautilus",         }
+        init        = true,
+        exclusive   = true,
+        screen      = 1,
+        layout      = awful.layout.suit.tile,
+        exec_once   = {"dolphin"}, --When the tag is accessed for the first time, execute this command
+        class  = {
+            "Thunar", "Konqueror", "Dolphin", "ark", "Nautilus","emelfm"
+        }
     } ,
     {
         name = "Develop",
-     init        = true                                              ,
-        exclusive   = true                                           ,
---                     screen      = 1,--{config.data().scr.pri, config.data().scr.sec}     ,
-     --   icon        = utils.tools.invertedIconPath("bug.png")        ,
+        init        = true,
+        exclusive   = true,
+        screen      = 1,
+        clone_on    = 2, -- Create a single instance of this tag on screen 1, but also show it on screen 2
+                         -- The tag can be used on both screen, but only one at once
         layout      = awful.layout.suit.max                          ,
         class ={ 
-            "Kate"          , "KDevelop"       , "Codeblocks", "Code::Blocks" , "DDD", "kate4"             }
+            "Kate", "KDevelop", "Codeblocks", "Code::Blocks" , "DDD", "kate4"}
     } ,
     {
-        name = "Edit",
-        init        = true                                           ,
-        exclusive   = true                                           ,
---                     screen      =1,-- {config.data().scr.pri, config.data().scr.sec}     ,
-     --   icon        = utils.tools.invertedIconPath("editor.png")     ,
-        layout      = awful.layout.suit.tile.bottom                  ,
-        class = { 
-            "KWrite"        , "GVim"           , "Emacs"     , "Code::Blocks" , "DDD"               }
-    } ,
-    {
-        name = "Media",
-        init        = true                                           ,
-        exclusive   = true                                           ,
-     --   icon        = utils.tools.invertedIconPath("media.png")      ,
-        layout      = awful.layout.suit.max                          ,
-        class = { 
-            "Xine"          , "xine Panel"     , "xine*"     , "MPlayer"      , "GMPlayer",
-            "XMMS" }
-    } ,
-    {
-        name = "Doc",
-    --  init        = true                                           ,
-        exclusive   = true                                           ,
-     --   icon        = utils.tools.invertedIconPath("info.png")       ,
---                     screen      = config.data().scr.music                          ,
-        layout      = awful.layout.suit.max                          ,
+        name        = "Doc",
+        init        = false, -- This tag wont be created at startup, but will be when one of the
+                             -- client in the "class" section will start. It will be created on
+                             -- the client startup screen
+        exclusive   = true,
+        layout      = awful.layout.suit.max,
         class       = {
             "Assistant"     , "Okular"         , "Evince"    , "EPDFviewer"   , "xpdf",
             "Xpdf"          ,                                        }
     } ,
-
-
-    -----------------VOLATILE TAGS-----------------------
-    {
-        name        = "Imaging",
-        init        = false                                          ,
-        position    = 10                                             ,
-        exclusive   = true                                           ,
-     --   icon        = utils.tools.invertedIconPath("image.png")      ,
-        layout      = awful.layout.suit.max                          ,
-        class       = {"Inkscape"      , "KolourPaint"    , "Krita"     , "Karbon"       , "Karbon14"}
-    } ,
-    {
-        name        = "Picture",
-        init        = false                                          ,
-        position    = 10                                             ,
-        exclusive   = true                                           ,
-     --   icon        = utils.tools.invertedIconPath("image.png")      ,
-        layout      = awful.layout.suit.max                          ,
-        class       = {"Digikam"       , "F-Spot"         , "GPicView"  , "ShowPhoto"    , "KPhotoAlbum"}
-    } ,
-    {
-        name        = "Video",
-        init        = false                                          ,
-        position    = 10                                             ,
-        exclusive   = true                                           ,
-     --   icon        = utils.tools.invertedIconPath("video.png")      ,
-        layout      = awful.layout.suit.max                          ,
-        class       = {"KDenLive"      , "Cinelerra"      , "AVIDeMux"  , "Kino"}
-    } ,
-    {
-        name        = "Movie",
-        init        = false                                          ,
-        position    = 12                                             ,
-        exclusive   = true                                           ,
-     --   icon        = utils.tools.invertedIconPath("video.png")      ,
-        layout      = awful.layout.suit.max                          ,
-        class       = {"VLC"}
-    } ,
-    {
-        name        = "3D",
-        init        = false                                          ,
-        position    = 10                                             ,
-        exclusive   = true                                           ,
-     --   icon        = utils.tools.invertedIconPath("3d.png")         ,
-        layout      = awful.layout.suit.max.fullscreen               ,
-        class       = {"Blender"       , "Maya"           , "K-3D"      , "KPovModeler"  , }
-    } ,
-    {
-        name        = "Music",
-        init        = false                                          ,
-        position    = 10                                             ,
-        exclusive   = true                                           ,
-        screen      = 1,----config.data().scr.music or config.data().scr.pri   ,
-     --   icon        = utils.tools.invertedIconPath("media.png")      ,
-        layout      = awful.layout.suit.max                          ,
-        class       = {"Amarok"        , "SongBird"       , "last.fm"   ,}
-    } ,
-    {
-        name        = "Down",
-        init        = false                                          ,
-        position    = 10                                             ,
-        exclusive   = true                                           ,
-     --   icon        = utils.tools.invertedIconPath("download.png")   ,
-        layout      = awful.layout.suit.max                          ,
-        class       = {"Transmission"  , "KGet"}
-    } ,
-    {
-        name        = "Office",
-        init        = false                                          ,
-        position    = 10                                             ,
-        exclusive   = true                                           ,
-     --   icon        = utils.tools.invertedIconPath("office.png")     ,
-        layout      = awful.layout.suit.max                          ,
-        class       = {
-            "OOWriter"      , "OOCalc"         , "OOMath"    , "OOImpress"    , "OOBase"       ,
-            "SQLitebrowser" , "Silverun"       , "Workbench" , "KWord"        , "KSpread"      ,
-            "KPres","Basket", "openoffice.org" , "OpenOffice.*"               ,                }
-    } ,
-    {
-        name        = "RSS",
-        init        = false                                          ,
-        position    = 10                                             ,
-        exclusive   = true                                           ,
-     --   icon        = utils.tools.invertedIconPath("rss.png")        ,
-        layout      = awful.layout.suit.max                          ,
-        class       = {}
-    } ,
-    {
-        name        = "Chat",
-        init        = false                                          ,
-        position    = 10                                             ,
-        exclusive   = true                                           ,
-        screen      = 1,--config.data().scr.sec or config.data().scr.sec ,
-     --   icon        = utils.tools.invertedIconPath("chat.png")       ,
-        layout      = awful.layout.suit.tile                         ,
-        class       = {"Pidgin"        , "Kopete"         ,}
-    } ,
-    {
-        name        = "Burning",
-        init        = false                                          ,
-        position    = 10                                             ,
-        exclusive   = true                                           ,
-     --   icon        = utils.tools.invertedIconPath("burn.png")       ,
-        layout      = awful.layout.suit.tile                         ,
-        class       = {"k3b"}
-    } ,
-    {
-        name        = "Mail",
-        init        = false                                          ,
-        position    = 10                                             ,
-        exclusive   = true                                           ,
---         screen      = 1,--config.data().scr.sec or config.data().scr.pri     ,
-     --   icon        = utils.tools.invertedIconPath("mail2.png")      ,
-        layout      = awful.layout.suit.max                          ,
-        class       = {"Thunderbird"   , "kmail"          , "evolution" ,}
-    } ,
-    {
-        name        = "IRC",
-        init        = false                                          ,
-        position    = 10                                             ,
-        exclusive   = true                                           ,
-        screen      = 1,--config.data().scr.irc or config.data().scr.pri     ,
-        init        = true                                           ,
-        spawn       = "konversation"                                 ,
-     --   icon        = utils.tools.invertedIconPath("irc.png")        ,
-        force_screen= true                                           ,
-        layout      = awful.layout.suit.fair                         ,
-        class       = {"Konversation"  , "Botch"          , "WeeChat"   , "weechat"      , "irssi"}
-    } ,
-    {
-        name        = "Test",
-        init        = false                                          ,
-        position    = 99                                             ,
-        exclusive   = false                                          ,
-        screen      = 1,--config.data().scr.sec or config.data().scr.pri     ,
-        leave_kills = true                                           ,
-        persist     = true                                           ,
-     --   icon        = utils.tools.invertedIconPath("tools.png")      ,
-        layout      = awful.layout.suit.max                          ,
-        class       = {}
-    } ,
-    {
-        name        = "Config",
-        init        = false                                          ,
-        position    = 10                                             ,
-        exclusive   = false                                          ,
-     --   icon        = utils.tools.invertedIconPath("tools.png")      ,
-        layout      = awful.layout.suit.max                        ,
-        class       = {"Systemsettings", "Kcontrol"       , "gconf-editor"}
-    } ,
-    {
-        name        = "Game",
-        init        = false                                          ,
-        screen      = 1,--config.data().scr.pri                          ,
-        position    = 10                                             ,
-        exclusive   = false                                          ,
-     --   icon        = utils.tools.invertedIconPath("game.png")       ,
-        force_screen= true                                           ,
-        layout      = awful.layout.suit.max                        ,
-        class       = {"sauer_client"  , "Cube 2$"        , "Cube 2: Sauerbraten"        ,}
-    } ,
-    {
-        name        = "Gimp",
-        init        = false                                          ,
-        position    = 10                                             ,
-        exclusive   = false                                          ,
-     --   icon        = utils.tools.invertedIconPath("image.png")      ,
-        layout      = awful.layout.tile                              ,
-        nmaster     = 1                                              ,
-        incncol     = 10                                             ,
-        ncol        = 2                                              ,
-        mwfact      = 0.00                                           ,
-        class       = {}
-    } ,
-    {
-        name        = "Other",
-        init        = true                                           ,
-        position    = 15                                             ,
-        exclusive   = false                                          ,
-     --   icon        = utils.tools.invertedIconPath("term.png")       ,
-        max_clients = 5                                              ,
-        screen      = {3, 4, 5}                                      ,
-        layout      = awful.layout.suit.tile                         ,
-        class       = {}
-    } ,
-    {
-        name        = "MediaCenter",
-        init        = true                                           ,
-        position    = 15                                             ,
-        exclusive   = false                                          ,
-     --   icon        = utils.tools.invertedIconPath("video.png")      ,
-        max_clients = 5                                              ,
-        screen      = 1,--config.data().scr.media or config.data().scr.pri   ,
-        init        = "mythfrontend"                                 ,
-        layout      = awful.layout.suit.tile                         ,
-        class       = {"mythfrontend"  , "xbmc"           ,}
-    } ,
-    }
-tyranical.properties.intrusive = {
-    "ksnapshot"     , "pinentry"       , "gtksu"     , "kcalc"        , "xcalc"           ,
-    "feh"           , "Gradient editor", "About KDE" , "Paste Special", "Background color",
-    "kcolorchooser" , "plasmoidviewer" , "plasmaengineexplorer" , "Xephyr" , "kruler"     ,
 }
-tyranical.properties.floating = {
+
+-- Ignore the tag "exclusive" property for the following clients (matched by classes)
+tyrannical.properties.intrusive = {
+    "ksnapshot"     , "pinentry"       , "gtksu"     , "kcalc"        , "xcalc"               ,
+    "feh"           , "Gradient editor", "About KDE" , "Paste Special", "Background color"    ,
+    "kcolorchooser" , "plasmoidviewer" , "Xephyr"    , "kruler"       , "plasmaengineexplorer",
+}
+
+-- Ignore the tiled layout for the matching clients
+tyrannical.properties.floating = {
     "MPlayer"      , "pinentry"        , "ksnapshot"  , "pinentry"     , "gtksu"          ,
     "xine"         , "feh"             , "kmix"       , "kcalc"        , "xcalc"          ,
     "yakuake"      , "Select Color$"   , "kruler"     , "kcolorchooser", "Paste Special"  ,
     "New Form"     , "Insert Picture"  , "kcharselect", "mythfrontend" , "plasmoidviewer" 
 }
 
-tyranical.properties.ontop = {
+-- Make the matching clients (by classes) on top of the default layout
+tyrannical.properties.ontop = {
     "Xephyr"       , "ksnapshot"       , "kruler"
 }
 
-tyranical.properties.size_hints_honor = { xterm = false, URxvt = false, aterm = false, sauer_client = false, mythfrontend  = false}
+-- Force the matching clients (by classes) to be centered on the screen on init
+tyranic.properties.centered = {
+    "kcalc"
+}
+
+tyrannical.properties.size_hints_honor = { xterm = false, URxvt = false, aterm = false, sauer_client = false, mythfrontend  = false}
 
 
 -- {{{ Wallpaper

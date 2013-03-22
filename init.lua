@@ -39,7 +39,7 @@ local function on_selected_change(tag,data)
 end
 
 --Turn tags -> matches into matches -> tags
-local function fill_tyranic(tab_in,tab_out,value)
+local function fill_tyrannical(tab_in,tab_out,value)
     if tab_in and tab_out then
         for i=1,#tab_in do
             local low = string.lower(tab_in[i])
@@ -52,8 +52,8 @@ local function fill_tyranic(tab_in,tab_out,value)
 end
 
 --Load tags, this cannot be undone
-local function load_tags(tyranic_tags)
-    for k,v in ipairs(tyranic_tags) do
+local function load_tags(tyrannical_tags)
+    for k,v in ipairs(tyrannical_tags) do
         if v.init ~= false then
             v.instances = {}
             local stype = type(v.screen)
@@ -70,8 +70,8 @@ local function load_tags(tyranic_tags)
         elseif v.volatile == nil then
             v.volatile = true
         end
-        fill_tyranic(v.class,class_client,v)
-        fill_tyranic(v.match,matches_client,v)
+        fill_tyrannical(v.class,class_client,v)
+        fill_tyrannical(v.match,matches_client,v)
     end
 end
 
@@ -101,7 +101,7 @@ local function match_client(c, startup)
         end
         --Focus new client
         if rules.properties.focus_new ~= false then
-            c.focus = c
+            capi.client.focus = c
         end
         --Set other properties
         for k,v in pairs(rules.properties) do
@@ -153,6 +153,9 @@ local function match_client(c, startup)
     local tmp,tag = class_client[low],awful.tag.add(c.class,{name=c.class,volatile=true,screen=(c.screen <= capi.screen.count()) and c.screen or 1,layout=awful.layout.suit.max})
     tmp.tags[#tmp.tags+1] = {name=c.class,instances = {[c.screen]=tag},volatile=true,screen=c.screen}
     c:tags({tag})
+    if awful.tag.getproperty(tag,"focus_on_new") ~= false then
+        awful.tag.viewonly(tag)
+    end
 end
 
 capi.client.connect_signal("manage", match_client)
@@ -237,7 +240,7 @@ local function setter (table, key,value)
     elseif key == "properties" then
         properties = value
         setmetatable(properties, {__newindex = function(table,k,v) load_property(k,v) end})
-        for k,v in pairs(tyranic_properties) do
+        for k,v in pairs(tyrannical_properties) do
             load_property(k,v)
         end
     end

@@ -1,4 +1,4 @@
-Tyranic - A simple rule engine
+Tyrannical - A simple rule engine
 ------------------------------
 
 ### Description
@@ -7,7 +7,7 @@ many kid aged TV stars, it havn't grown that well. Many of it's, once unique, fe
 supported by the default awful.tag engine, adding legacy complexity to the code base and affecting
 performance.
 
-This is why Tyranic was created. It is a light rule engine offering pretty much the same rule system,
+This is why Tyrannical was created. It is a light rule engine offering pretty much the same rule system,
 but without all the dynamic tag code. Note that dynamic tagging is now supported directly by awesome.
 
 ### Examples
