@@ -24,7 +24,7 @@ end
 
 -------------------------------DATA------------------------------
 
-local class_client,matches_client = {},{}
+local class_client,matches_client,tags_hash = {},{},{}
 
 --------------------------TYRANIC LOGIC--------------------------
 
@@ -72,6 +72,7 @@ local function load_tags(tyrannical_tags)
         end
         fill_tyrannical(v.class,class_client,v)
         fill_tyrannical(v.match,matches_client,v)
+        tags_hash[v.name or "N/A"] = v
     end
 end
 
@@ -233,6 +234,8 @@ setmetatable(properties, {__newindex = function(table,k,v) load_property(k,v) en
 local function getter (table, key)
     if key == "properties" then
         return properties
+    elseif key == "tags_by_name" then
+        return tags_hash
     end
 end
 local function setter (table, key,value)
