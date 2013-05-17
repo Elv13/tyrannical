@@ -84,6 +84,7 @@ tyrannical.tags = {
         exclusive   = true,                   -- Refuse any other type of clients (by classes)
         screen      = {1,2},                  -- Create this tag on screen 1 and screen 2
         layout      = awful.layout.suit.tile, -- Use the tile layout
+        selected    = true,
         class       = { --Accept the following classes, refuse everything else (because of "exclusive=true")
             "xterm" , "urxvt" , "aterm","URxvt","XTerm","konsole","terminator","gnome-terminal"
         }

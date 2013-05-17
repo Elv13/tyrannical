@@ -138,6 +138,7 @@ Then edit this section to fit your needs. That available tag properties are:
 *   clone_on
 *   class
 *   exec_once
+*   selected
 
 The available client properties are:
 *   floating
@@ -155,3 +156,4 @@ The available client properties are:
 *   sticky
 *   focusable
 *   skip_taskbar
+
