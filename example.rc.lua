@@ -156,7 +156,7 @@ tyrannical.properties.ontop = {
 }
 
 -- Force the matching clients (by classes) to be centered on the screen on init
-tyranic.properties.centered = {
+tyrannical.properties.centered = {
     "kcalc"
 }
 
