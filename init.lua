@@ -44,7 +44,6 @@ local function fill_tyrannical(tab_in,tab_out,value)
         for i=1,#tab_in do
             local low = string.lower(tab_in[i])
             local tmp = tab_out[low] or {tags={},properties={}}
-            value.instances=  value.instances or {}
             tmp.tags[#tmp.tags+1] = value
             tab_out[low] = tmp
         end
@@ -55,17 +54,16 @@ end
 local function load_tags(tyrannical_tags)
     for k,v in ipairs(tyrannical_tags) do
         if v.init ~= false then
-            v.instances = {}
             local stype = type(v.screen)
             if stype == "table" then
                 for k2,v2 in pairs(v.screen) do
                     if v2 <= capi.screen.count() then
                         v.screen = v2
-                        v.instances[v2] = awful.tag.add(v.name,v)
+                        awful.tag.add(v.name,v)
                     end
                 end
             elseif (v.screen or 1) <= capi.screen.count() then
-                v.instances[v.screen or 1] = awful.tag.add(v.name,v)
+                awful.tag.add(v.name,v)
             end
         elseif v.volatile == nil then
             v.volatile = true
@@ -130,7 +128,7 @@ local function match_client(c, startup)
                 tag_tmp.screen = tag_tmp.force_screen == true and tag_tmp.screen or c.screen
                 tag_tmp.screen = (tag_tmp.screen <= capi.screen.count()) and tag_tmp.screen or 1
                 c.screen = tag_tmp.screen
-                tag_tmp.instances[(c.screen <= capi.screen.count()) and tag_tmp.screen or 1] = awful.tag.add(tag_tmp.name,tag_tmp)
+                awful.tag.add(tag_tmp.name,tag_tmp)
                 tag_tmp.screen = cache
             end
             tags[#tags+1] = tag_tmp.instances[(c.screen <= capi.screen.count()) and c.screen or 1]
@@ -200,6 +198,8 @@ awful.tag.add,awful.tag._setscreen = function(tag,props)
     end
     t.selected = props.selected or false
     t:connect_signal("property::selected", function(t) on_selected_change(t,props or {}) end)
+    props.instances = props.instances or {}
+    props.instances[t.screen or 1] = t
     return t
 end,awful.tag.setscreen
 
@@ -235,11 +235,11 @@ local function getter (table, key)
     if key == "properties" then
         return properties
     elseif key == "tags_by_name" then
-        return tags_hash
+        return tags_hash --Getter only, use .tags for setter, see syntax
     end
 end
 local function setter (table, key,value)
-    if key == "tags" then
+    if key == "tags" then --Setter only, use "tags_by_name" to get
         load_tags(value)
     elseif key == "properties" then
         properties = value
