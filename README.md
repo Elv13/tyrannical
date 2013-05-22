@@ -16,7 +16,7 @@ Install [Xephyr](http://www.freedesktop.org/wiki/Software/Xephyr) and run the fo
 
  sh utils/xephyr.sh start
 
-*Note:* The tyranical repository must be named awesome-tyranical for the script to work out of the box.
+*Note:* The tyrannical repository must be named awesome-tyrannical for the script to work out of the box.
 
 Also see samples.rc.lua for a sample.
 
@@ -121,7 +121,7 @@ tyrannical.properties.ontop = {
 }
 
 -- Force the matching clients (by classes) to be centered on the screen on init
-tyranic.properties.centered = {
+tyrannical.properties.centered = {
     "kcalc"
 }</pre>
 
