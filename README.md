@@ -1,5 +1,5 @@
 Tyrannical - A simple rule engine
-------------------------------
+---------------------------------
 
 ### Description
 Shifty was great and served us well since the early days of the Awesome 3.\* series, but just as
@@ -157,3 +157,12 @@ The available client properties are:
 *   focusable
 *   skip_taskbar
 
+### FAQ
+
+#### Is it possible to add, remove and move tags?
+
+Yes, this feature is now part of awesome awful library. It doesn't require external module anymore. The awful dynamic tag implementation is compatible with Tyrannical. See the [API](http://awesome.naquadah.org/doc/api/)
+
+#### Is it possible to have relative indexes (position) for tags?
+
+Tyrannical share awful tag list, it doesn't keep its own indexes, making it harder to implement this feature in the core. Given that, this feature is outside of the project scope. That being said, nothing prevent you from adding a "position" property to the tag. Once this is done, edit the default rc.lua keybindings to find the position by looping the tags. In case the tag is not yet created, you can access it with `tyrannical.tags_by_name["your tag name"]` array. This array is automatically generated. You can then add it using `awful.tag.add(tyrannical.tags_by_name["your tag name"].name,tyrannical.tags_by_name["your tag name"])`. Tyrannical purpose is not to duplicate or change awful.tag behavior, it is simply a configuration wrapper.

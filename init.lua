@@ -196,8 +196,8 @@ awful.tag.add,awful.tag._setscreen = function(tag,props)
         local t3 = awful.tag._add(tag,{screen = awful.tag.getproperty(t,"clone_on"), clone_of = t,icon=awful.tag.geticon(t)})
         --TODO prevent clients from being added to the clone
     end
-    t.selected = props.selected or false
     t:connect_signal("property::selected", function(t) on_selected_change(t,props or {}) end)
+    t.selected = props.selected or false
     props.instances = props.instances or {}
     props.instances[t.screen or 1] = t
     return t
