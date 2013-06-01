@@ -1,49 +1,61 @@
-Tyrannical - A simple rule engine
----------------------------------
+Tyrannical—A simple tag matching engine for Awesome
+-----------------------------------------------------
 
 ### Description
-Shifty was great and served us well since the early days of the Awesome 3.\* series, but just as
-many kid aged TV stars, it havn't grown that well. Many of it's, once unique, features are now
-supported by the default awful.tag engine, adding legacy complexity to the code base and affecting
-performance.
+Shifty was great and served us well since the early days of the Awesome 3.\*
+series, but just as many aged kid TV stars, it has not grown that well. Many of
+its once unique features are now supported by the default ```awful.tag```
+engine, adding legacy complexity to the code base and affecting performance.
 
-This is why Tyrannical was created. It is a light rule engine offering pretty much the same rules configuration,
-but without all the dynamic tag code. Note that dynamic tagging is now supported directly by awesome.
+This is why Tyrannical was created. It is a light rule engine offering pretty
+much the same rule configuration, but without all the dynamic tag code. Note
+that dynamic tagging is now supported directly by awesome.
 
 ### Examples
 
-Install [Xephyr](http://www.freedesktop.org/wiki/Software/Xephyr) and run the following script
+Install [Xephyr](http://www.freedesktop.org/wiki/Software/Xephyr) and run the
+following script
 
+```
  sh utils/xephyr.sh start
+```
 
-*Note:* The tyrannical repository must be named awesome-tyrannical for the script to work out of the box.
+*Note:* The tyrannical repository must be named awesome-tyrannical for the
+script to work out of the box.
 
-Also see samples.rc.lua for a sample.
+Also see ```samples.rc.lua``` for a sample.
 
 ### Configuration
 
-If you once used Shifty, you will feel confortable with Tyrannical. The only different is that
-Tyrannical integrate class matching directly in the tag configuration section. More advanced
-rules can be created using awful.rules. Again, Tyrannical was not created to duplicate awful,
-but to make dynamic (and static, as a side effect) tagging configuration easier. This module
-doesn't require any major initialisation, compared to shifty, it is much more transparent.
+If you previously used Shifty, you will feel comfortable using Tyrannical. The
+only difference is that in Tyrannical class matching is integrated into the tag
+configuration section. More advanced rules can be created using
+```awful.rules```. Again, Tyrannical was not created to duplicate awful, but to
+make dynamic (and static, as a side effect) tagging configuration easier. This
+module doesn't require any major initialisation. Compared to shifty, it is much
+more transparent.
 
-The first modification is to include the module at the top of rc.lua:
-<pre>local tyrannical = require("tyrannical")</pre>
+The first modification is to include the module at the top of your ```rc.lua```:
+```lua
+local tyrannical = require("tyrannical")
+```
 
 Then this section have to be replaced:
-<pre>-- {{{ Tags
+```lua
+-- {{{ Tags
 -- Define a tag table which hold all screen tags.
 tags = {}
 for s = 1, screen.count() do
     -- Each screen has its own tag table.
     tags[s] = awful.tag({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }, s, layouts[1])
 end
--- }}}</pre>
+-- }}}
+```
 
 by:
 
-<pre>tyrannical.tags = {
+```lua
+tyrannical.tags = {
     {
         name        = "Term",                 -- Call the tag "Term"
         init        = true,                   -- Load the tag on startup
@@ -123,7 +135,8 @@ tyrannical.properties.ontop = {
 -- Force the matching clients (by classes) to be centered on the screen on init
 tyrannical.properties.centered = {
     "kcalc"
-}</pre>
+}
+```
 
 Then edit this section to fit your needs. That available tag properties are:
 *   mwfact
@@ -161,8 +174,21 @@ The available client properties are:
 
 #### Is it possible to add, remove and move tags?
 
-Yes, this feature is now part of awesome awful library. It doesn't require external module anymore. The awful dynamic tag implementation is compatible with Tyrannical. See the [API](http://awesome.naquadah.org/doc/api/)
+Yes, this feature is now part of awful. It does not require an external module
+anymore. Awful's dynamic tag implementation is compatible with Tyrannical. See
+the [API](http://awesome.naquadah.org/doc/api/).
 
 #### Is it possible to have relative indexes (position) for tags?
 
-Tyrannical share awful tag list, it doesn't keep its own indexes, making it harder to implement this feature in the core. Given that, this feature is outside of the project scope. That being said, nothing prevent you from adding a "position" property to the tag. Once this is done, edit the default rc.lua keybindings to find the position by looping the tags. In case the tag is not yet created, you can access it with `tyrannical.tags_by_name["your tag name"]` array. This array is automatically generated. You can then add it using `awful.tag.add(tyrannical.tags_by_name["your tag name"].name,tyrannical.tags_by_name["your tag name"])`. Tyrannical purpose is not to duplicate or change awful.tag behavior, it is simply a configuration wrapper.
+Tyrannical shares awful's tag list. It does not keep its own indexes since this
+would make it harder to implement this feature in the core. Given that, this
+feature is outside the project scope. That being said, nothing prevents you
+from adding a "position" property to the tag. Once this is done, edit the
+default ```rc.lua``` keybindings to find the position by looping the tags. In
+case the tag is not yet created, you can access it with
+```tyrannical.tags_by_name["your tag name"]``` array. This array is
+automatically generated. You can then add it using
+```awful.tag.add(tyrannical.tags_by_name["your tag
+name"].name,tyrannical.tags_by_name["your tag name"])```. Tyrannical's purpose
+is not to duplicate or change ```awful.tag``` behavior, it is simply a
+configuration wrapper.
