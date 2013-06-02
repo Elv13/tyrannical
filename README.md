@@ -1,4 +1,4 @@
-Tyrannical—A simple tag matching engine for Awesome
+Tyrannical—A simple tag managment engine for Awesome
 -----------------------------------------------------
 
 ### Description

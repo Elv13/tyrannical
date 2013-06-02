@@ -23,7 +23,6 @@ for _,sig in ipairs(signals) do
 end
 
 -------------------------------DATA------------------------------
-
 local class_client,matches_client,tags_hash = {},{},{}
 
 --------------------------TYRANIC LOGIC--------------------------
@@ -56,12 +55,14 @@ local function load_tags(tyrannical_tags)
         if v.init ~= false then
             local stype = type(v.screen)
             if stype == "table" then
-                for k2,v2 in pairs(v.screen) do
+                local screens = v.screen
+                for k2,v2 in pairs(screens) do
                     if v2 <= capi.screen.count() then
                         v.screen = v2
                         awful.tag.add(v.name,v)
                     end
                 end
+                v.screen = screens
             elseif (v.screen or 1) <= capi.screen.count() then
                 awful.tag.add(v.name,v)
             end
@@ -191,6 +192,8 @@ awful.tag.withcurrent,awful.tag._add  = function(c, startup)
 end,awful.tag.add
 
 awful.tag.add,awful.tag._setscreen = function(tag,props)
+    props.screen = props.screen or capi.mouse.screen
+    props.instances = props.instances or {}
     local t = awful.tag._add(tag,props)
     if awful.tag.getproperty(t,"clone_on") and awful.tag.getproperty(t,"clone_on") ~= t.screen then
         local t3 = awful.tag._add(tag,{screen = awful.tag.getproperty(t,"clone_on"), clone_of = t,icon=awful.tag.geticon(t)})
@@ -198,8 +201,7 @@ awful.tag.add,awful.tag._setscreen = function(tag,props)
     end
     t:connect_signal("property::selected", function(t) on_selected_change(t,props or {}) end)
     t.selected = props.selected or false
-    props.instances = props.instances or {}
-    props.instances[t.screen or 1] = t
+    props.instances[props.screen] = t
     return t
 end,awful.tag.setscreen
 
@@ -228,8 +230,7 @@ awful.tag.swap = function(tag1,tag2)
 end
 
 --------------------------OBJECT GEARS---------------------------
-local properties = {}
-setmetatable(properties, {__newindex = function(table,k,v) load_property(k,v) end})
+local properties = setmetatable({}, {__newindex = function(table,k,v) load_property(k,v) end})
 
 local function getter (table, key)
     if key == "properties" then
@@ -243,7 +244,6 @@ local function setter (table, key,value)
         load_tags(value)
     elseif key == "properties" then
         properties = value
-        setmetatable(properties, {__newindex = function(table,k,v) load_property(k,v) end})
         for k,v in pairs(tyrannical_properties) do
             load_property(k,v)
         end
