@@ -124,6 +124,7 @@ local function match_client(c, startup)
         local tags = {}
         for j=1,#(rules.tags or {}) do
             local tag_tmp = rules.tags[j]
+            tag_tmp.instances = tag_tmp.instances or {}
             if not tag_tmp.instances[c.screen or 1] then
                 local cache = tag_tmp.screen
                 tag_tmp.screen = tag_tmp.force_screen == true and tag_tmp.screen or c.screen
