@@ -1,13 +1,9 @@
--- Coment this out if you dont need to test it this way
--- Remove last dir
-local pwd = os.getenv("PWD"):match("(.+)/.-")
-package.path = pwd .. "/?.lua;" .. pwd .. "/?/init.lua;" .. package.path
-local tyrannical = require("tyrannical")
 
 -- Standard awesome library
 local gears = require("gears")
 local awful = require("awful")
 awful.rules = require("awful.rules")
+local tyrannical = require("tyrannical")
 require("awful.autofocus")
 -- Widget and layout library
 local wibox = require("wibox")
