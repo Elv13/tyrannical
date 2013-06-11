@@ -35,7 +35,7 @@ make dynamic (and static, as a side effect) tagging configuration easier. This
 module doesn't require any major initialisation. Compared to shifty, it is much
 more transparent.
 
-The first modification is to include the module at the top of your ```rc.lua```:
+The first modification is to include the module at the top of your ```rc.lua``` (after ```awful.rules = require("awful.rules")```):
 ```lua
 local tyrannical = require("tyrannical")
 ```
@@ -176,7 +176,8 @@ The available client properties are:
 
 Yes, this feature is now part of awful. It does not require an external module
 anymore. Awful's dynamic tag implementation is compatible with Tyrannical. See
-the [API](http://awesome.naquadah.org/doc/api/).
+the [API](http://awesome.naquadah.org/doc/api/) and this
+[user contribution](https://github.com/Elv13/tyrannical/issues/15#issuecomment-18227575)
 
 #### Is it possible to have relative indexes (position) for tags?
 
