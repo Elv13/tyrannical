@@ -142,7 +142,9 @@ tyrannical.settings.group_children = true --Force popups/dialogs to have the sam
 
 ```
 
-Then edit this section to fit your needs. That available tag properties are:
+Then edit this section to fit your needs. 
+
+### That available tags properties are:
 
 | Property              | Description                                    | Type             |
 | --------------------- | ---------------------------------------------- |:----------------:|
@@ -163,22 +165,39 @@ Then edit this section to fit your needs. That available tag properties are:
 | **force_screen**      | Force a screen                                 | number           |
 | **no_focus_stealing** | Prevent tag from stealing focus on new clients | boolean          |
 
-The available client properties are:
-*   floating
-*   intrusive
-*   ontop
-*   border_color
-*   border_width
-*   centered
-*   hidden
-*   below
-*   above
-*   fullscreen
-*   maximized_horizontal
-*   maximized_vertical
-*   sticky
-*   focusable
-*   skip_taskbar
+
+### The available client properties are:
+
+| Property                  | Description                                    | Type             |
+| ------------------------- | ---------------------------------------------- |:----------------:|
+| **floating**              | Make the client floating or insert into layout | boolean          |
+| **intrusive**             | Ignore tag "exclusive" property                | boolean          |
+| **ontop**                 | Display on top of the normal layout layer      | boolean          |
+| **border_color**          | Change client default border color*            | string           |
+| **border_width**          | Change the client border width                 | number           |
+| **centered**              | Center the client on the screen at launch      | boolean          |
+| **hidden**                | Hide this client (minimize)                    | boolean          |
+| **below**                 | Display below other clients                    | boolean          |
+| **above**                 | Display above other clients                    | boolean          |
+| **fullscreen**            | Cover the whole screen                         | boolean          |
+| **maximized_horizontal**  | Cover all horizontal space                     | boolean          |
+| **maximized_vertical**    | Cover all vertical space                       | boolean          |
+| **sticky**                | Display in all tags                            | boolean          |
+| **focusable**             | Allow focus                                    | boolean          |
+| **skip_taskbar**          | Do not add to tasklist                         | boolean          |
+
+ *Need default rc.lua modifications in the "client.connect_signal('focus')" section
+
+### The available global settings are:
+
+| Property                          | Description                                         | Type             |
+| --------------------------------- | --------------------------------------------------- |:----------------:|
+| **default_layout**                | The default layout for tags                         | layout           |
+| **mwfact**                        | The default master/slave ratio                      | float (0-1)      |
+| **block_children_focus_stealing** | Prevent popups from stealing focus                  | boolean          |
+| **group_children**                | Add dialogs to the same tags as their parent client | boolean          |
+
+---
 
 ### FAQ
 
@@ -203,3 +222,7 @@ automatically generated. You can then add it using
 name"].name,tyrannical.tags_by_name["your tag name"])```. Tyrannical's purpose
 is not to duplicate or change ```awful.tag``` behavior, it is simply a
 configuration wrapper.
+
+#### What is Tyrannical license?
+
+Tyrannical is licensed under the [2 clause BSD](http://opensource.org/licenses/BSD-2-Clause)

@@ -154,7 +154,8 @@ local function match_client(c, startup)
     end
     --Last resort, create a new tag
     class_client[low] = class_client[low] or {tags={},properties={}}
-    local tmp,tag = class_client[low],awful.tag.add(c.class,{name=c.class,volatile=true,screen=(c.screen <= capi.screen.count()) and c.screen or 1,layout=awful.layout.suit.max})
+    local tmp,tag = class_client[low],awful.tag.add(c.class,{name=c.class,volatile=true,screen=(c.screen <= capi.screen.count())
+      and c.screen or 1,layout=settings.default_layout or awful.layout.suit.max})
     tmp.tags[#tmp.tags+1] = {name=c.class,instances = {[c.screen]=tag},volatile=true,screen=c.screen}
     c:tags({tag})
     if awful.tag.getproperty(tag,"focus_on_new") ~= false then
@@ -197,6 +198,7 @@ end,awful.tag.add
 awful.tag.add,awful.tag._setscreen = function(tag,props)
     props.screen = props.screen or capi.mouse.screen
     props.instances = props.instances or {}
+    props.mwfact = props.mwfact or settings.mwfact
     local t = awful.tag._add(tag,props)
     if awful.tag.getproperty(t,"clone_on") and awful.tag.getproperty(t,"clone_on") ~= t.screen then
         local t3 = awful.tag._add(tag,{screen = awful.tag.getproperty(t,"clone_on"), clone_of = t,icon=awful.tag.geticon(t)})
