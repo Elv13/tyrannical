@@ -136,22 +136,32 @@ tyrannical.properties.ontop = {
 tyrannical.properties.centered = {
     "kcalc"
 }
+
+tyrannical.settings.block_children_focus_stealing = true --Block popups ()
+tyrannical.settings.group_children = true --Force popups/dialogs to have the same tags as the parent client
+
 ```
 
 Then edit this section to fit your needs. That available tag properties are:
-*   mwfact
-*   nmaster
-*   ncol
-*   icon
-*   hide
-*   screen (number or array)
-*   exclusive
-*   layout
-*   init
-*   clone_on
-*   class
-*   exec_once
-*   selected
+
+| Property              | Description                                    | Type             |
+| --------------------- | ---------------------------------------------- |:----------------:|
+| **mwfact**            | Tiled layout master/slave ratio                | float(0-1)       |
+| **nmaster**           | Number of master clients                       | number           |
+| **ncol**              | Number of columns                              | number           |
+| **icon**              | Tag icon                                       | path             |
+| **hide**              | Hide this tag from view                        | boolean          |
+| **screen**            | Tag screen(s)                                  | number or array  |
+| **exclusive**         | Allow only client from the "class" attributes  | boolean          |
+| **layout**            | The tag layout                                 | layout           |
+| **init**              | Create when awesome launch                     | boolean          |
+| **clone_on**          | Create a clone on screen(s)                    | number or array  |
+| **class**             | Match these classes to this tag                | array of string  |
+| **exec_once**         | Execute when the tag is first selected         | string (command) |
+| **selected**          | Select when created                            | boolean          |
+| **volatile**          | Destroy when the last client is closed         | boolean          |
+| **force_screen**      | Force a screen                                 | number           |
+| **no_focus_stealing** | Prevent tag from stealing focus on new clients | boolean          |
 
 The available client properties are:
 *   floating

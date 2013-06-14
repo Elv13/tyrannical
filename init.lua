@@ -7,8 +7,6 @@ local awful = require("awful")
 local capi = {client = client , tag    = tag    ,
               screen = screen , mouse  = mouse  }
 
-local module = {}
-
 -------------------------------INIT------------------------------
 
 local signals = {
@@ -23,7 +21,7 @@ for _,sig in ipairs(signals) do
 end
 
 -------------------------------DATA------------------------------
-local class_client,matches_client,tags_hash = {},{},{}
+local module,class_client,matches_client,tags_hash,settings = {},{},{},{},{}
 
 --------------------------TYRANIC LOGIC--------------------------
 
@@ -90,7 +88,10 @@ local function match_client(c, startup)
     if not c then return end
     local low = string.lower(c.class or "N/A")
     local rules = class_client[low]
-    if rules then
+    if c.transient_for and settings.group_children == true then
+        c.sticky = c.transient_for.sticky or false
+        return c:tags(c.transient_for:tags())
+    elseif rules then
         --Force floating state if necessary
         if rules.properties.floating ~= nil then
             awful.client.floating.set(c, rules.properties.floating)
@@ -100,7 +101,7 @@ local function match_client(c, startup)
             awful.placement.centered(c, nil)
         end
         --Focus new client
-        if rules.properties.focus_new ~= false then
+        if rules.properties.focus_new ~= false and (c.transient_for and not settings.block_transient_for_focus_stealing) then
             capi.client.focus = c
         end
         --Set other properties
@@ -115,8 +116,7 @@ local function match_client(c, startup)
             end
             tag = awful.tag.selected(c.screen)
             if tag then --Can be false if there is no tags
-                c:tags({tag})
-                return
+                return c:tags({tag})
             end
         end
         --TODO pre_match
@@ -137,8 +137,11 @@ local function match_client(c, startup)
         end
         if #tags > 0 then
             c:tags(tags)
-            if awful.tag.getproperty(tags[1],"focus_new") ~= false then
+            if awful.tag.getproperty(tags[1],"focus_new") ~= false and not (c.transient_for and settings.block_transient_for_focus_stealing) 
+              and not awful.tag.getproperty(tags[1],"no_focus_stealing") then
                 awful.tag.viewonly(tags[1])
+            elseif awful.tag.getproperty(tags[1],"no_focus_stealing") then
+                c.urgent = true
             end
             return
         end
@@ -171,7 +174,6 @@ capi.client.connect_signal("untagged", function (c, t)
     end
 end)
 
--- awful.tag.withcurrent = function() end --Disable automatic tag insertion
 awful.tag.withcurrent,awful.tag._add  = function(c, startup)
     local tags,old_tags = {},c:tags()
     --Safety to prevent
@@ -215,6 +217,8 @@ awful.tag.setscreen,awful.tag._viewonly = function(tag,screen) --Why this isn't 
 end,awful.tag.viewonly
 
 awful.tag.viewonly = function(t)
+    if not t then return end
+    if not awful.tag.getscreen(t) then awful.tag.setscreen(1) end
     awful.tag._viewonly(t)
     if awful.tag.getproperty(t,"clone_of") then
         awful.tag.swap(t,awful.tag.getproperty(t,"clone_of"))
@@ -231,24 +235,8 @@ awful.tag.swap = function(tag1,tag2)
 end
 
 --------------------------OBJECT GEARS---------------------------
-local properties = setmetatable({}, {__newindex = function(table,k,v) load_property(k,v) end})
+local getter = {properties   = setmetatable({}, {__newindex = function(table,k,v) load_property(k,v) end}),
+                settings     = settings, tags_by_name = tags_hash} --Getter only, use .tags for setter, see syntax
+local setter = {tags         = load_tags}
 
-local function getter (table, key)
-    if key == "properties" then
-        return properties
-    elseif key == "tags_by_name" then
-        return tags_hash --Getter only, use .tags for setter, see syntax
-    end
-end
-local function setter (table, key,value)
-    if key == "tags" then --Setter only, use "tags_by_name" to get
-        load_tags(value)
-    elseif key == "properties" then
-        properties = value
-        for k,v in pairs(tyrannical_properties) do
-            load_property(k,v)
-        end
-    end
-end
-
-return setmetatable(module, { __call = function(_, ...) return end , __index = getter, __newindex = setter})
+return setmetatable(module,{__index=function(t,k) return getter[k] end,__newindex=function(t,k,v) if setter[k] then return setter[k](v) end end})
