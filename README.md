@@ -9,7 +9,8 @@ engine, adding legacy complexity to the code base and affecting performance.
 
 This is why Tyrannical was created. It is a light rule engine offering pretty
 much the same rule configuration, but without all the dynamic tag code. Note
-that dynamic tagging is now supported directly by awesome.
+that dynamic tagging is now supported directly by awesome. Tyrannical support
+Awesome WM version 3.5 and higher.
 
 ### Examples
 
