@@ -144,60 +144,61 @@ tyrannical.settings.group_children = true --Force popups/dialogs to have the sam
 
 Then edit this section to fit your needs. 
 
-### That available tags properties are:
+##### That available tags properties are:
 
 | Property              | Description                                    | Type             |
 | --------------------- | ---------------------------------------------- |:----------------:|
-| **mwfact**            | Tiled layout master/slave ratio                | float(0-1)       |
-| **nmaster**           | Number of master clients                       | number           |
-| **ncol**              | Number of columns                              | number           |
-| **icon**              | Tag icon                                       | path             |
-| **hide**              | Hide this tag from view                        | boolean          |
-| **screen**            | Tag screen(s)                                  | number or array  |
-| **exclusive**         | Allow only client from the "class" attributes  | boolean          |
-| **layout**            | The tag layout                                 | layout           |
-| **init**              | Create when awesome launch                     | boolean          |
-| **clone_on**          | Create a clone on screen(s)                    | number or array  |
 | **class**             | Match these classes to this tag                | array of string  |
+| **clone_on**          | Create a clone on screen(s)                    | number or array  |
+| **exclusive**         | Allow only client from the "class" attributes  | boolean          |
 | **exec_once**         | Execute when the tag is first selected         | string (command) |
+| **force_screen**      | Force a screen                                 | number           |
+| **hide**              | Hide this tag from view                        | boolean          |
+| **icon**              | Tag icon                                       | path             |
+| **init**              | Create when awesome launch                     | boolean          |
+| **layout**            | The tag layout                                 | layout           |
+| **mwfact**            | Tiled layout master/slave ratio                | float(0-1)       |
+| **ncol**              | Number of columns                              | number           |
+| **nmaster**           | Number of master clients                       | number           |
+| **no_focus_stealing** | Prevent tag from stealing focus on new clients | boolean          |
+| **screen**            | Tag screen(s)                                  | number or array  |
 | **selected**          | Select when created                            | boolean          |
 | **volatile**          | Destroy when the last client is closed         | boolean          |
-| **force_screen**      | Force a screen                                 | number           |
-| **no_focus_stealing** | Prevent tag from stealing focus on new clients | boolean          |
 
 
-### The available client properties are:
+##### The available client properties are:
 
 | Property                  | Description                                    | Type             |
 | ------------------------- | ---------------------------------------------- |:----------------:|
-| **floating**              | Make the client floating or insert into layout | boolean          |
-| **intrusive**             | Ignore tag "exclusive" property                | boolean          |
-| **ontop**                 | Display on top of the normal layout layer      | boolean          |
+| **above**                 | Display above other clients                    | boolean          |
+| **below**                 | Display below other clients                    | boolean          |
 | **border_color**          | Change client default border color*            | string           |
 | **border_width**          | Change the client border width                 | number           |
 | **centered**              | Center the client on the screen at launch      | boolean          |
-| **hidden**                | Hide this client (minimize)                    | boolean          |
-| **below**                 | Display below other clients                    | boolean          |
-| **above**                 | Display above other clients                    | boolean          |
+| **floating**              | Make the client floating or insert into layout | boolean          |
+| **focusable**             | Allow focus                                    | boolean          |
 | **fullscreen**            | Cover the whole screen                         | boolean          |
+| **hidden**                | Hide this client (minimize)                    | boolean          |
+| **intrusive**             | Ignore tag "exclusive" property                | boolean          |
 | **maximized_horizontal**  | Cover all horizontal space                     | boolean          |
 | **maximized_vertical**    | Cover all vertical space                       | boolean          |
-| **sticky**                | Display in all tags                            | boolean          |
-| **focusable**             | Allow focus                                    | boolean          |
+| **ontop**                 | Display on top of the normal layout layer      | boolean          |
 | **skip_taskbar**          | Do not add to tasklist                         | boolean          |
+| **sticky**                | Display in all tags                            | boolean          |
 
  *Need default rc.lua modifications in the "client.connect_signal('focus')" section
 
-### The available global settings are:
+##### The available global settings are:
 
 | Property                          | Description                                         | Type             |
 | --------------------------------- | --------------------------------------------------- |:----------------:|
-| **default_layout**                | The default layout for tags                         | layout           |
-| **mwfact**                        | The default master/slave ratio                      | float (0-1)      |
 | **block_children_focus_stealing** | Prevent popups from stealing focus                  | boolean          |
+| **default_layout**                | The default layout for tags                         | layout           |
 | **group_children**                | Add dialogs to the same tags as their parent client | boolean          |
+| **mwfact**                        | The default master/slave ratio                      | float (0-1)      |
 
----
+
+-----------------------------------------------------
 
 ### FAQ
 
