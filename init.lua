@@ -154,9 +154,9 @@ local function match_client(c, startup)
     end
     --Last resort, create a new tag
     class_client[low] = class_client[low] or {tags={},properties={}}
-    local tmp,tag = class_client[low],awful.tag.add(c.class,{name=c.class,volatile=true,screen=(c.screen <= capi.screen.count())
+    local tmp,tag = class_client[low],awful.tag.add(c.class,{name=c.class,volatile=true,exclusive=true,screen=(c.screen <= capi.screen.count())
       and c.screen or 1,layout=settings.default_layout or awful.layout.suit.max})
-    tmp.tags[#tmp.tags+1] = {name=c.class,instances = {[c.screen]=tag},volatile=true,screen=c.screen}
+    tmp.tags[#tmp.tags+1] = {name=c.class,instances = {[c.screen]=tag},volatile=true,screen=c.screen,exclusive=true}
     c:tags({tag})
     if awful.tag.getproperty(tag,"focus_on_new") ~= false then
         awful.tag.viewonly(tag)
