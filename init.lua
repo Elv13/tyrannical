@@ -1,7 +1,7 @@
 local setmetatable   = setmetatable
 local print  , pairs = print  , pairs
 local ipairs , type  = ipairs , type
-local string         = string
+local string , unpack= string,unpack
 local awful = require("awful")
 
 local capi = {client = client , tag    = tag    ,
@@ -121,23 +121,24 @@ local function match_client(c, startup)
         end
         --TODO pre_match
         --Add to matches
-        local tags = {}
+        local tags,tags_src,fav_scr,c_src,mouse_s = {},{},false,c.screen,capi.mouse.screen
         for j=1,#(rules.tags or {}) do
-            local tag_tmp = rules.tags[j]
-            tag_tmp.instances = tag_tmp.instances or {}
-            if not tag_tmp.instances[c.screen or 1] then
-                local cache = tag_tmp.screen
-                tag_tmp.screen = tag_tmp.force_screen == true and tag_tmp.screen or c.screen
-                tag_tmp.screen = (tag_tmp.screen <= capi.screen.count()) and tag_tmp.screen or 1
-                c.screen = tag_tmp.screen
-                awful.tag.add(tag_tmp.name,tag_tmp)
-                tag_tmp.screen = cache
+            local tag,cache = rules.tags[j],rules.tags[j].screen
+            tag.instances,has_screen = tag.instances or {},(type(tag.screen)=="table" and awful.util.table.hasitem(tag.screen,c_src)~=nil)
+            tag.screen = (tag.force_screen ~= true and c_src) or (has_screen and c_src or type(tag.screen)=="table" and tag.screen[1] or tag.screen)
+            tag.screen = (tag.screen <= capi.screen.count()) and tag.screen or mouse_s
+            if not tag.instances[tag.screen] and not (fav_scr == true and mouse_s ~= tag.screen) then
+                awful.tag.add(tag.name,tag)
             end
-            tags[#tags+1] = tag_tmp.instances[(c.screen <= capi.screen.count()) and c.screen or 1]
+            tags_src[tag.screen],fav_scr = tags_src[tag.screen] or {},fav_scr or (tag.screen == mouse_s) --Reset if a better screen is found
+            tags_src[tag.screen][#tags_src[tag.screen]+1] = tag.instances[tag.screen]
+            tag.screen = cache
         end
+        tags = tags_src[mouse_s] or tags_src[c_src] or select(2,next(tags_src)) or awful.util.table.join(unpack(tags_src))
+        c.screen = tags[1] and awful.tag.getscreen(tags[1]) or c_src
         if #tags > 0 then
             c:tags(tags)
-            if awful.tag.getproperty(tags[1],"focus_new") ~= false and not (c.transient_for and settings.block_transient_for_focus_stealing) 
+            if awful.tag.getproperty(tags[1],"focus_new") ~= false and not (c.transient_for and settings.block_transient_for_focus_stealing)
               and not awful.tag.getproperty(tags[1],"no_focus_stealing") then
                 awful.tag.viewonly(tags[1])
             elseif awful.tag.getproperty(tags[1],"no_focus_stealing") then
