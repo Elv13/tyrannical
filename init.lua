@@ -9,21 +9,17 @@ local capi = {client = client , tag    = tag    ,
 
 -------------------------------INIT------------------------------
 
-local signals = {
-  "property::exclusive"    , "property::init"       , "property::volatile" ,
-  "property::focus_new"    , "property::instances"  , "property::match"    ,
-  "property::class"        , "property::spawn"      , "property::position" ,
-  "property::force_screen" , "property::max_clients", "property::exec_once",
-  "property::clone_on"     , "property::clone_of"
-}
+local signals,module,class_client,tags_hash,settings = {
+  "exclusive"   , "init"      , "volatile"  , "focus_new" , "instances"        ,
+  "match"       , "class"     , "spawn"     , "position"  , "force_screen"     ,
+  "max_clients" , "exec_once" , "clone_on"  , "clone_of"  , "no_focus_stealing",
+},{},{},{},{}
+
 for _,sig in ipairs(signals) do
-    capi.tag.add_signal(sig)
+    capi.tag.add_signal("property::"..sig)
 end
 
--------------------------------DATA------------------------------
-local module,class_client,matches_client,tags_hash,settings = {},{},{},{},{}
-
---------------------------TYRANIC LOGIC--------------------------
+----------------------TYRANNICAL LOGIC--------------------------
 
 --Called when a tag is selected/unselected
 local function on_selected_change(tag,data)
@@ -32,18 +28,6 @@ local function on_selected_change(tag,data)
             awful.util.spawn(v, false)
         end
         data._init_done = true
-    end
-end
-
---Turn tags -> matches into matches -> tags
-local function fill_tyrannical(tab_in,tab_out,value)
-    if tab_in and tab_out then
-        for i=1,#tab_in do
-            local low = string.lower(tab_in[i])
-            local tmp = tab_out[low] or {tags={},properties={}}
-            tmp.tags[#tmp.tags+1] = value
-            tab_out[low] = tmp
-        end
     end
 end
 
@@ -67,8 +51,14 @@ local function load_tags(tyrannical_tags)
         elseif v.volatile == nil then
             v.volatile = true
         end
-        fill_tyrannical(v.class,class_client,v)
-        fill_tyrannical(v.match,matches_client,v)
+        if v.class and class_client then
+            for i=1,#v.class do
+                local low = string.lower(v.class[i])
+                local tmp = class_client[low] or {tags={},properties={}}
+                tmp.tags[#tmp.tags+1] = v
+                class_client[low] = tmp
+            end
+        end
         tags_hash[v.name or "N/A"] = v
     end
 end
@@ -83,6 +73,39 @@ local function load_property(name,property)
     end
 end
 
+--Apply all properties
+local function apply_properties(c,override,normal)
+    local prop = awful.util.table.join(normal,override)
+    --Set all 'c.something' properties
+    for k,_ in pairs(prop) do
+        prop[k] = (override[v] ~= nil) and override[k] or normal[k]
+        c[k] = prop[k]
+    end
+    --Force floating state, if necessary
+    if prop.floating ~= nil then
+        awful.client.floating.set(c, prop.floating)
+    end
+    --Center client
+    if prop.centered == true then
+        awful.placement.centered(c, nil)
+    end
+    --Focus new client
+    if prop.focus_new ~= false and (c.transient_for and not settings.block_transient_for_focus_stealing) then
+        capi.client.focus = c
+    end
+    --Add to the current tag if the client is intrusive, ignore exclusive
+    if prop.intrusive == true then
+        local tag = awful.tag.selected(c.screen)
+        if not tag then
+            awful.tag.viewonly(awful.tag.gettags(c.screen)[1])
+        end
+        tag = awful.tag.selected(c.screen)
+        if tag then --Can be false if there is no tags
+            return c:tags({tag})
+        end
+    end
+end
+
 --Match client
 local function match_client(c, startup)
     if not c then return end
@@ -92,34 +115,8 @@ local function match_client(c, startup)
         c.sticky = c.transient_for.sticky or false
         return c:tags(c.transient_for:tags())
     elseif rules then
-        --Force floating state if necessary
-        if rules.properties.floating ~= nil then
-            awful.client.floating.set(c, rules.properties.floating)
-        end
-        --Center client
-        if rules.properties.centered == true then
-            awful.placement.centered(c, nil)
-        end
-        --Focus new client
-        if rules.properties.focus_new ~= false and (c.transient_for and not settings.block_transient_for_focus_stealing) then
-            capi.client.focus = c
-        end
-        --Set other properties
-        for k,v in pairs(rules.properties) do
-            c[k] = v
-        end
-        --Add to the current tag if the client is intrusive, ignore exclusive
-        if rules.properties.intrusive == true then
-            local tag = awful.tag.selected(c.screen)
-            if not tag then
-                awful.tag.viewonly(awful.tag.gettags(c.screen)[1])
-            end
-            tag = awful.tag.selected(c.screen)
-            if tag then --Can be false if there is no tags
-                return c:tags({tag})
-            end
-        end
-        --TODO pre_match
+        local ret = apply_properties(c,{},rules.properties)
+        if ret then return ret end
         --Add to matches
         local tags,tags_src,fav_scr,c_src,mouse_s = {},{},false,c.screen,capi.mouse.screen
         for j=1,#(rules.tags or {}) do
@@ -146,7 +143,6 @@ local function match_client(c, startup)
             end
             return
         end
-        --TODO post_match
     end
     --Add to the current tag if not exclusive
     local cur_tag = awful.tag.selected(c.screen)
@@ -239,7 +235,7 @@ end
 
 --------------------------OBJECT GEARS---------------------------
 local getter = {properties   = setmetatable({}, {__newindex = function(table,k,v) load_property(k,v) end}),
-                settings     = settings, tags_by_name = tags_hash} --Getter only, use .tags for setter, see syntax
+                settings     = settings, tags_by_name = tags_hash, }
 local setter = {tags         = load_tags}
 
 return setmetatable(module,{__index=function(t,k) return getter[k] end,__newindex=function(t,k,v) if setter[k] then return setter[k](v) end end})
