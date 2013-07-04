@@ -212,6 +212,7 @@ awful.tag.setscreen,awful.tag._viewonly = function(tag,screen) --Why this isn't 
     awful.tag._setscreen(tag,screen)
     for k,c in ipairs(tag:clients()) do
         c.screen = screen or 1 --Move all clients
+        c:tags({tag}) --Prevent some very strange side effects, does create some issue with multitag clients
     end
 end,awful.tag.viewonly
 
