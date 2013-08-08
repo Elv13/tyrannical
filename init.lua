@@ -176,9 +176,7 @@ awful.tag.withcurrent,awful.tag._add  = function(c, startup)
     local tags,old_tags = {},c:tags()
     --Safety to prevent
     for k, t in ipairs(old_tags) do
-        if awful.tag.getscreen(t) == c.screen then
-            tags[#tags+1] = t
-        end
+        tags[#tags+1] = (awful.tag.getscreen(t) == c.screen) and t or nil
     end
     --Necessary when dragging clients
     if startup == nil and old_tags[1] and old_tags[1].screen ~= c.screen then --nil != false
@@ -193,9 +191,8 @@ awful.tag.withcurrent,awful.tag._add  = function(c, startup)
 end,awful.tag.add
 
 awful.tag.add,awful.tag._setscreen = function(tag,props)
-    props.screen = props.screen or capi.mouse.screen
-    props.instances = props.instances or {}
-    props.mwfact = props.mwfact or settings.mwfact
+    props.screen,props.instances = props.screen or capi.mouse.screen,props.instances or {}
+    props.mwfact,props.layout = props.mwfact or settings.mwfact,props.layout or settings.default_layout or awful.layout.max
     local t = awful.tag._add(tag,props)
     if awful.tag.getproperty(t,"clone_on") and awful.tag.getproperty(t,"clone_on") ~= t.screen then
         local t3 = awful.tag._add(tag,{screen = awful.tag.getproperty(t,"clone_on"), clone_of = t,icon=awful.tag.geticon(t)})
@@ -208,6 +205,7 @@ awful.tag.add,awful.tag._setscreen = function(tag,props)
 end,awful.tag.setscreen
 
 awful.tag.setscreen,awful.tag._viewonly = function(tag,screen) --Why this isn't by default...
+    if not tag or type(tag) ~= tag then return end
     awful.tag.history.restore(tag.screen,1)
     awful.tag._setscreen(tag,screen)
     for k,c in ipairs(tag:clients()) do
