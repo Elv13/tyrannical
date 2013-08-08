@@ -198,6 +198,8 @@ Then edit this section to fit your needs.
 | **group_children**                | Add dialogs to the same tags as their parent client | boolean          |
 | **mwfact**                        | The default master/slave ratio                      | float (0-1)      |
 
+It's worth noting that some settings like `mwfact` and `default_layout` should
+be set **before** the tag arrow. Otherwise they wont take effect at startup.
 
 -----------------------------------------------------
 

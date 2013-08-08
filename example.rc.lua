@@ -72,7 +72,11 @@ local layouts =
 }
 -- }}}
 
+-- First, set some settings
+tyrannical.settings.default_layout =  awful.layout.suit.tile.left
+tyrannical.settings.mwfact = 0.66
 
+-- Setup some tags
 tyrannical.tags = {
     {
         name        = "Term",                 -- Call the tag "Term"
@@ -156,6 +160,7 @@ tyrannical.properties.centered = {
     "kcalc"
 }
 
+-- Do not honor size hints request for those classes
 tyrannical.properties.size_hints_honor = { xterm = false, URxvt = false, aterm = false, sauer_client = false, mythfrontend  = false}
 
 
