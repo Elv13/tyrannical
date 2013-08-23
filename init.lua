@@ -113,7 +113,9 @@ local function match_client(c, startup)
     local rules = class_client[low]
     if c.transient_for and settings.group_children == true then
         c.sticky = c.transient_for.sticky or false
-        return c:tags(c.transient_for:tags())
+        c:tags(c.transient_for:tags())
+        capi.client.focus = c
+        return
     elseif rules then
         local ret = apply_properties(c,{},rules.properties)
         if ret then return ret end
@@ -141,13 +143,18 @@ local function match_client(c, startup)
             elseif awful.tag.getproperty(tags[1],"no_focus_stealing") then
                 c.urgent = true
             end
+            if not rules.properties.no_autofocus then
+                capi.client.focus = c
+            end
             return
         end
     end
     --Add to the current tag if not exclusive
     local cur_tag = awful.tag.selected(c.screen)
     if awful.tag.getproperty(cur_tag,"exclusive") ~= true then
-        return c:tags({cur_tag})
+        c:tags({cur_tag})
+        capi.client.focus = c
+        return true
     end
     --Last resort, create a new tag
     class_client[low] = class_client[low] or {tags={},properties={}}
