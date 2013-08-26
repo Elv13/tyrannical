@@ -118,7 +118,12 @@ local function match_client(c, startup)
         return
     elseif rules then
         local ret = apply_properties(c,{},rules.properties)
-        if ret then return ret end
+        if ret then
+            if not rules.properties.no_autofocus then
+                capi.client.focus = c
+            end
+            return ret
+        end
         --Add to matches
         local tags,tags_src,fav_scr,c_src,mouse_s = {},{},false,c.screen,capi.mouse.screen
         for j=1,#(rules.tags or {}) do
