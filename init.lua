@@ -9,11 +9,11 @@ local capi = {client = client , tag    = tag    ,
 
 -------------------------------INIT------------------------------
 
-local signals,module,class_client,tags_hash,settings = {
+local signals,module,class_client,tags_hash,settings,sn_callback = {
   "exclusive"   , "init"      , "volatile"  , "focus_new" , "instances"        ,
   "match"       , "class"     , "spawn"     , "position"  , "force_screen"     ,
   "max_clients" , "exec_once" , "clone_on"  , "clone_of"  , "no_focus_stealing",
-},{},{},{},{}
+},{},{},{},{},{}
 
 for _,sig in ipairs(signals) do
     capi.tag.add_signal("property::"..sig)
@@ -109,6 +109,7 @@ end
 --Match client
 local function match_client(c, startup)
     if not c then return end
+    if c.startup_id and sn_callback[c.startup_id] and sn_callback[c.startup_id](c,startup) then return end
     local low = string.lower(c.class or "N/A")
     local rules = class_client[low]
     if c.transient_for and settings.group_children == true then
@@ -217,13 +218,13 @@ awful.tag.add,awful.tag._setscreen = function(tag,props)
 end,awful.tag.setscreen
 
 awful.tag.setscreen,awful.tag._viewonly = function(tag,screen) --Why this isn't by default...
-    if not tag or type(tag) ~= tag then return end
-    awful.tag.history.restore(tag.screen,1)
+    if not tag or type(tag) ~= "tag" then return end
     awful.tag._setscreen(tag,screen)
     for k,c in ipairs(tag:clients()) do
         c.screen = screen or 1 --Move all clients
         c:tags({tag}) --Prevent some very strange side effects, does create some issue with multitag clients
     end
+    awful.tag.history.restore(tag.screen,1)
 end,awful.tag.viewonly
 
 awful.tag.viewonly = function(t)
@@ -246,7 +247,7 @@ end
 
 --------------------------OBJECT GEARS---------------------------
 local getter = {properties   = setmetatable({}, {__newindex = function(table,k,v) load_property(k,v) end}),
-                settings     = settings, tags_by_name = tags_hash, }
+                settings     = settings, tags_by_name = tags_hash, sn_callback = sn_callback}
 local setter = {tags         = load_tags}
 
 return setmetatable(module,{__index=function(t,k) return getter[k] end,__newindex=function(t,k,v) if setter[k] then return setter[k](v) end end})
