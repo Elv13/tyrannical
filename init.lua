@@ -141,7 +141,7 @@ local function match_client(c, startup)
         end
         tags = tags_src[mouse_s] or tags_src[c_src] or select(2,next(tags_src)) or awful.util.table.join(unpack(tags_src))
         c.screen = tags[1] and awful.tag.getscreen(tags[1]) or c_src
-        if #tags > 0 then
+        if #tags > 0 and tags[1] then
             c:tags(tags)
             if awful.tag.getproperty(tags[1],"focus_new") ~= false and not (c.transient_for and settings.block_transient_for_focus_stealing)
               and not awful.tag.getproperty(tags[1],"no_focus_stealing") then
@@ -164,9 +164,9 @@ local function match_client(c, startup)
     end
     --Last resort, create a new tag
     class_client[low] = class_client[low] or {tags={},properties={}}
-    local tmp,tag = class_client[low],awful.tag.add(c.class,{name=c.class,volatile=true,exclusive=true,screen=(c.screen <= capi.screen.count())
+    local tmp,tag = class_client[low],awful.tag.add(c.class or "N/A",{name=c.class or "N/A",volatile=true,exclusive=true,screen=(c.screen <= capi.screen.count())
       and c.screen or 1,layout=settings.default_layout or awful.layout.suit.max})
-    tmp.tags[#tmp.tags+1] = {name=c.class,instances = {[c.screen]=tag},volatile=true,screen=c.screen,exclusive=true}
+    tmp.tags[#tmp.tags+1] = {name=c.class or "N/A",instances = {[c.screen]=tag},volatile=true,screen=c.screen,exclusive=true}
     c:tags({tag})
     if awful.tag.getproperty(tag,"focus_on_new") ~= false then
         awful.tag.viewonly(tag)
@@ -229,7 +229,7 @@ end,awful.tag.viewonly
 
 awful.tag.viewonly = function(t)
     if not t then return end
-    if not awful.tag.getscreen(t) then awful.tag.setscreen(1) end
+    if not awful.tag.getscreen(t) then awful.tag.setscreen(capi.mouse.screen) end
     awful.tag._viewonly(t)
     if awful.tag.getproperty(t,"clone_of") then
         awful.tag.swap(t,awful.tag.getproperty(t,"clone_of"))
