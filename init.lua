@@ -110,8 +110,12 @@ end
 local function match_client(c, startup)
     if not c then return end
     if c.startup_id and sn_callback[c.startup_id] and sn_callback[c.startup_id](c,startup) then return end
-    local low = string.lower(c.class or "N/A")
+    local low = string.lower(c.instance or "N/A")
     local rules = class_client[low]
+	if rules == nil then
+		low = string.lower(c.class or "N/A")
+		rules = class_client[low]
+	end
     if c.transient_for and settings.group_children == true then
         c.sticky = c.transient_for.sticky or false
         c:tags(c.transient_for:tags())
