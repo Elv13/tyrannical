@@ -157,7 +157,7 @@ local function match_client(c, startup)
     end
     --Add to the current tag if not exclusive
     local cur_tag = awful.tag.selected(c.screen)
-    if awful.tag.getproperty(cur_tag,"exclusive") ~= true then
+    if cur_tag and awful.tag.getproperty(cur_tag,"exclusive") ~= true then
         c:tags({cur_tag})
         capi.client.focus = c
         return true
