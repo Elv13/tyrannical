@@ -13,6 +13,7 @@ local signals,module,class_client,tags_hash,settings,sn_callback = {
   "exclusive"   , "init"      , "volatile"  , "focus_new" , "instances"        ,
   "match"       , "class"     , "spawn"     , "position"  , "force_screen"     ,
   "max_clients" , "exec_once" , "clone_on"  , "clone_of"  , "no_focus_stealing",
+  "shape_bounding",
 },{},{},{},{},{}
 
 for _,sig in ipairs(signals) do
@@ -94,7 +95,7 @@ local function apply_properties(c,override,normal)
         capi.client.focus = c
     end
     --Add to the current tag if the client is intrusive, ignore exclusive
-    if prop.intrusive == true then
+    if prop.intrusive == true or (settings.force_odd_as_intrusive and c.type ~= "normal") then
         local tag = awful.tag.selected(c.screen)
         if not tag then
             awful.tag.viewonly(awful.tag.gettags(c.screen)[1])
@@ -146,8 +147,8 @@ local function match_client(c, startup)
             if awful.tag.getproperty(tags[1],"focus_new") ~= false and not (c.transient_for and settings.block_transient_for_focus_stealing)
               and not awful.tag.getproperty(tags[1],"no_focus_stealing") then
                 awful.tag.viewonly(tags[1])
-            elseif awful.tag.getproperty(tags[1],"no_focus_stealing") then
-                c.urgent = true
+--             elseif awful.tag.getproperty(tags[1],"no_focus_stealing") then
+--                 c.urgent = true --It is not Tyrannical job to decide if it is urgent or not
             end
             if not rules.properties.no_autofocus then
                 capi.client.focus = c

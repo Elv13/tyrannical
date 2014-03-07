@@ -197,6 +197,8 @@ Then edit this section to fit your needs.
 | **default_layout**                | The default layout for tags                         | layout           |
 | **group_children**                | Add dialogs to the same tags as their parent client | boolean          |
 | **mwfact**                        | The default master/slave ratio                      | float (0-1)      |
+| **force_odd_as_intrusive**        | Make all non-normal (dock, splash) intrusive        | boolean          |
+
 
 It's worth noting that some settings like `mwfact` and `default_layout` should
 be set **before** the tag arrow. Otherwise they wont take effect at startup.
