@@ -12,6 +12,18 @@ much the same rule configuration, but without all the dynamic tag code. Note
 that dynamic tagging is now supported directly by awesome. Tyrannical support
 Awesome WM version 3.5 and higher.
 
+### Installation
+
+This is how to install Tyrannical
+
+```
+    mkdir -p ~/.config/awesome
+    cd ~/.config/awesome
+    git clone https://github.com/Elv13/tyrannical.git
+```
+
+Then either use the sample rc.lua or upgrade your existing one.
+
 ### Examples
 
 Install [Xephyr](http://www.freedesktop.org/wiki/Software/Xephyr) and run the
@@ -213,6 +225,12 @@ Yes, this feature is now part of awful. It does not require an external module
 anymore. Awful's dynamic tag implementation is compatible with Tyrannical. See
 the [API](http://awesome.naquadah.org/doc/api/) and this
 [user contribution](https://github.com/Elv13/tyrannical/issues/15#issuecomment-18227575)
+
+#### How do I get a client class?
+
+From a terminal, execute `xprop`, then click on an instance of that client.
+There will be a "CLASS" line with one or more class. Always pick the first one,
+Tyrannical is not case sensitive.
 
 #### Is it possible to have relative indexes (position) for tags?
 
