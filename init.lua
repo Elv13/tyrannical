@@ -255,3 +255,5 @@ local getter = {properties   = setmetatable({}, {__newindex = function(table,k,v
 local setter = {tags         = load_tags}
 
 return setmetatable(module,{__index=function(t,k) return getter[k] end,__newindex=function(t,k,v) if setter[k] then return setter[k](v) end end})
+
+-- vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
