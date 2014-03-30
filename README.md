@@ -159,24 +159,26 @@ Then edit this section to fit your needs.
 
 ##### That available tags properties are:
 
-| Property              | Description                                    | Type             |
-| --------------------- | ---------------------------------------------- |:----------------:|
-| **class**             | Match these classes to this tag                | array of string  |
-| **clone_on**          | Create a clone on screen(s)                    | number or array  |
-| **exclusive**         | Allow only client from the "class" attributes  | boolean          |
-| **exec_once**         | Execute when the tag is first selected         | string (command) |
-| **force_screen**      | Force a screen                                 | number           |
-| **hide**              | Hide this tag from view                        | boolean          |
-| **icon**              | Tag icon                                       | path             |
-| **init**              | Create when awesome launch                     | boolean          |
-| **layout**            | The tag layout                                 | layout           |
-| **mwfact**            | Tiled layout master/slave ratio                | float(0-1)       |
-| **ncol**              | Number of columns                              | number           |
-| **nmaster**           | Number of master clients                       | number           |
-| **no_focus_stealing** | Prevent tag from stealing focus on new clients | boolean          |
-| **screen**            | Tag screen(s)                                  | number or array  |
-| **selected**          | Select when created                            | boolean          |
-| **volatile**          | Destroy when the last client is closed         | boolean          |
+| Property                  | Description                                          | Type             |
+| ------------------------- | ---------------------------------------------------- |:----------------:|
+| **class**                 | Match these classes to this tag                      | array of string  |
+| **clone_on**              | Create a clone on screen(s)                          | number or array  |
+| **exclusive**             | Allow only client from the "class" attributes        | boolean          |
+| **exec_once**             | Execute when the tag is first selected               | string (command) |
+| **force_screen**          | Force a screen                                       | number           |
+| **hide**                  | Hide this tag from view                              | boolean          |
+| **icon**                  | Tag icon                                             | path             |
+| **init**                  | Create when awesome launch                           | boolean          |
+| **layout**                | The tag layout                                       | layout           |
+| **mwfact**                | Tiled layout master/slave ratio                      | float(0-1)       |
+| **ncol**                  | Number of columns                                    | number           |
+| **nmaster**               | Number of master clients                             | number           |
+| **no_focus_stealing**     | Do not change focus then a new client is added       | boolean          |
+| **no_focus_stealing_in**  | Do not select this tag when a new client is added    | boolean          |
+| **no_focus_stealing_out** | Do not unselect when a new client is added elsewhere | boolean          |
+| **screen**                | Tag screen(s)                                        | number or array  |
+| **selected**              | Select when created                                  | boolean          |
+| **volatile**              | Destroy when the last client is closed               | boolean          |
 
 
 ##### The available client properties are:
@@ -210,6 +212,7 @@ Then edit this section to fit your needs.
 | **group_children**                | Add dialogs to the same tags as their parent client | boolean          |
 | **mwfact**                        | The default master/slave ratio                      | float (0-1)      |
 | **force_odd_as_intrusive**        | Make all non-normal (dock, splash) intrusive        | boolean          |
+| **no_focus_stealing_out**         | Do not unselect tags when a new client is added     | boolean          |
 
 
 It's worth noting that some settings like `mwfact` and `default_layout` should

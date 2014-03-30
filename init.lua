@@ -4,8 +4,8 @@ local ipairs , type  = ipairs , type
 local string , unpack= string,unpack
 local awful = require("awful")
 
-local capi = {client = client , tag    = tag    ,
-              screen = screen , mouse  = mouse  }
+local capi = {client = client , tag    = tag   , awesome = awesome,
+              screen = screen , mouse  = mouse                    }
 
 -------------------------------INIT------------------------------
 
@@ -13,7 +13,7 @@ local signals,module,class_client,tags_hash,settings,sn_callback = {
   "exclusive"   , "init"      , "volatile"  , "focus_new" , "instances"        ,
   "match"       , "class"     , "spawn"     , "position"  , "force_screen"     ,
   "max_clients" , "exec_once" , "clone_on"  , "clone_of"  , "no_focus_stealing",
-  "shape_bounding",
+  "shape_bounding", "no_focus_stealing_out","no_focus_stealing_in"
 },{},{},{},{},{}
 
 for _,sig in ipairs(signals) do
@@ -110,6 +110,7 @@ end
 --Match client
 local function match_client(c, startup)
     if not c then return end
+    local startup = startup == nil and capi.awesome.startup or startup
     if c.startup_id and sn_callback[c.startup_id] and sn_callback[c.startup_id](c,startup) then return end
     local low = string.lower(c.class or "N/A")
     local rules = class_client[low]
@@ -145,7 +146,7 @@ local function match_client(c, startup)
         if #tags > 0 and tags[1] then
             c:tags(tags)
             if awful.tag.getproperty(tags[1],"focus_new") ~= false and not (c.transient_for and settings.block_transient_for_focus_stealing)
-              and not awful.tag.getproperty(tags[1],"no_focus_stealing") then
+              and not awful.tag.getproperty(tags[1],"no_focus_stealing_in") then
                 awful.tag.viewonly(tags[1])
 --             elseif awful.tag.getproperty(tags[1],"no_focus_stealing") then
 --                 c.urgent = true --It is not Tyrannical job to decide if it is urgent or not
@@ -218,15 +219,24 @@ awful.tag.add,awful.tag._setscreen = function(tag,props)
     return t
 end,awful.tag.setscreen
 
-awful.tag.setscreen,awful.tag._viewonly = function(tag,screen) --Why this isn't by default...
-    if not tag or type(tag) ~= "tag" then return end
-    awful.tag._setscreen(tag,screen)
-    for k,c in ipairs(tag:clients()) do
-        c.screen = screen or 1 --Move all clients
-        c:tags({tag}) --Prevent some very strange side effects, does create some issue with multitag clients
+awful.tag._viewonly = awful.tag.viewonly
+
+-- Check is Awesome is 3.5.3+
+if capi.awesome.startup == nil then
+    -- Monkey patch a bug fixed in 3.5.3
+    awful.tag.setscreen = function(tag,screen)
+        if not tag or type(tag) ~= "tag" then return end
+        awful.tag._setscreen(tag,screen)
+        for k,c in ipairs(tag:clients()) do
+            c.screen = screen or 1 --Move all clients
+            c:tags({tag}) --Prevent some very strange side effects, does create some issue with multitag clients
+        end
+        awful.tag.history.restore(tag.screen,1)
     end
-    awful.tag.history.restore(tag.screen,1)
-end,awful.tag.viewonly
+else
+    -- Restore the old behavior in newer Awesome
+    require("tyrannical.extra.request")
+end
 
 awful.tag.viewonly = function(t)
     if not t then return end
