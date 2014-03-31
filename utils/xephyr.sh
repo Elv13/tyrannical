@@ -1,4 +1,4 @@
-# If rc.lua.new is missing, make a default one.
+# If example.rc.lua is missing, make a default one.
 rc_lua=$PWD/example.rc.lua
 test -f $rc_lua || /bin/cp /etc/xdg/awesome/rc.lua $rc_lua
 
