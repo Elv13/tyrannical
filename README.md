@@ -157,7 +157,7 @@ tyrannical.settings.group_children = true --Force popups/dialogs to have the sam
 
 Then edit this section to fit your needs. 
 
-##### That available tags properties are:
+##### The available tag properties are:
 
 | Property                  | Description                                          | Type             |
 | ------------------------- | ---------------------------------------------------- |:----------------:|
