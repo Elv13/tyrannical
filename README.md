@@ -232,7 +232,7 @@ the [API](http://awesome.naquadah.org/doc/api/) and this
 #### How do I get a client class?
 
 From a terminal, execute `xprop`, then click on an instance of that client.
-There will be a "CLASS" line with one or more class. Always pick the first one,
+There will be a "CLASS" line with one or more class. Always pick the second one,
 Tyrannical is not case sensitive.
 
 #### Is it possible to have relative indexes (position) for tags?
