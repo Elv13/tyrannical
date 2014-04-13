@@ -179,6 +179,7 @@ Then edit this section to fit your needs.
 | **screen**                | Tag screen(s)                                        | number or array  |
 | **selected**              | Select when created                                  | boolean          |
 | **volatile**              | Destroy when the last client is closed               | boolean          |
+| **fallback**              | Use this tag for unmatched clients                   | boolean          |
 
 
 ##### The available client properties are:

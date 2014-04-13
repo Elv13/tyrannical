@@ -9,12 +9,12 @@ local capi = {client = client , tag    = tag   , awesome = awesome,
 
 -------------------------------INIT------------------------------
 
-local signals,module,class_client,tags_hash,settings,sn_callback = {
+local signals,module,class_client,tags_hash,settings,sn_callback,fallbacks = {
   "exclusive"   , "init"      , "volatile"  , "focus_new" , "instances"        ,
   "match"       , "class"     , "spawn"     , "position"  , "force_screen"     ,
   "max_clients" , "exec_once" , "clone_on"  , "clone_of"  , "no_focus_stealing",
   "shape_bounding", "no_focus_stealing_out","no_focus_stealing_in"
-},{},{},{},{},{}
+},{},{},{},{},{},{}
 
 for _,sig in ipairs(signals) do
     capi.tag.add_signal("property::"..sig)
@@ -163,6 +163,11 @@ local function match_client(c, startup)
         capi.client.focus = c
         return true
     end
+    --Add to the fallback tags
+    if #c:tags((function(arr) for k,v in ipairs(fallbacks) do
+                                  arr[#arr+1]=awful.tag.getscreen(v) == c.screen and v or nil
+                              end; return arr
+    end)({})) > 0 then return end
     --Last resort, create a new tag
     class_client[low] = class_client[low] or {tags={},properties={}}
     local tmp,tag = class_client[low],awful.tag.add(c.class or "N/A",{name=c.class or "N/A",volatile=true,exclusive=true,screen=(c.screen <= capi.screen.count())
@@ -212,6 +217,7 @@ awful.tag.add,awful.tag._setscreen = function(tag,props)
         local t3 = awful.tag._add(tag,{screen = awful.tag.getproperty(t,"clone_on"), clone_of = t,icon=awful.tag.geticon(t)})
         --TODO prevent clients from being added to the clone
     end
+    fallbacks[#fallbacks+1] = props.fallback and t or nil
     t:connect_signal("property::selected", function(t) on_selected_change(t,props or {}) end)
     t.selected = props.selected or false
     props.instances[props.screen] = t
