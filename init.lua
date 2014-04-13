@@ -24,11 +24,12 @@ end
 
 --Called when a tag is selected/unselected
 local function on_selected_change(tag,data)
-    if data and data.exec_once and tag.selected and not data._init_done then
-        for k,v in ipairs(type(data.exec_once) == "string" and {data.exec_once} or data.exec_once) do
-            awful.util.spawn(v, false)
+    if data and data.exec_once and tag.selected then
+        for _,v in ipairs(type(data.exec_once) == "string" and {data.exec_once} or data.exec_once) do
+            awful.util.spawn_with_shell("ps -ef | grep -v grep | grep '" .. v .. "' > /dev/null || (" .. v .. ")")
         end
-        data._init_done = true
+
+        --data._init_done = true
     end
 end
 
