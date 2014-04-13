@@ -28,8 +28,6 @@ local function on_selected_change(tag,data)
         for _,v in ipairs(type(data.exec_once) == "string" and {data.exec_once} or data.exec_once) do
             awful.util.spawn_with_shell("ps -ef | grep -v grep | grep '" .. v .. "' > /dev/null || (" .. v .. ")")
         end
-
-        --data._init_done = true
     end
 end
 
