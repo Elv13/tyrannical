@@ -13,7 +13,7 @@ local signals,module,class_client,tags_hash,settings,sn_callback,fallbacks = {
   "exclusive"   , "init"      , "volatile"  , "focus_new" , "instances"        ,
   "match"       , "class"     , "spawn"     , "position"  , "force_screen"     ,
   "max_clients" , "exec_once" , "clone_on"  , "clone_of"  , "no_focus_stealing",
-  "shape_bounding", "no_focus_stealing_out","no_focus_stealing_in"
+  "fallback"    , "no_focus_stealing_out","no_focus_stealing_in"
 },{},{},{},{},{},{}
 
 for _,sig in ipairs(signals) do
@@ -167,7 +167,9 @@ local function match_client(c, startup)
     if #c:tags((function(arr) for k,v in ipairs(fallbacks) do
                                   arr[#arr+1]=awful.tag.getscreen(v) == c.screen and v or nil
                               end; return arr
-    end)({})) > 0 then return end
+    end)({})) > 0 then -- Select the first fallback tag if the current tag isn't a fallback
+        return (not awful.util.table.hasitem(c:tags(), awful.tag.selected(c.screen or 1))) and awful.tag.viewonly(c:tags()[1])
+    end
     --Last resort, create a new tag
     class_client[low] = class_client[low] or {tags={},properties={}}
     local tmp,tag = class_client[low],awful.tag.add(c.class or "N/A",{name=c.class or "N/A",volatile=true,exclusive=true,screen=(c.screen <= capi.screen.count())
