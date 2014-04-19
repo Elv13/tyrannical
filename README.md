@@ -180,6 +180,8 @@ Then edit this section to fit your needs.
 | **selected**              | Select when created                                  | boolean          |
 | **volatile**              | Destroy when the last client is closed               | boolean          |
 | **fallback**              | Use this tag for unmatched clients                   | boolean          |
+| **locked**                | Do not add any more clients to this tag              | boolean          |
+| **max_clients**           | Maximum number of clients before creating a new tag  | number           |
 
 
 ##### The available client properties are:

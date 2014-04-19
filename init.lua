@@ -9,12 +9,12 @@ local capi = {client = client , tag    = tag   , awesome = awesome,
 
 -------------------------------INIT------------------------------
 
-local signals,module,class_client,tags_hash,settings,sn_callback,fallbacks = {
+local signals,module,class_client,tags_hash,settings,sn_callback,fallbacks,prop = {
   "exclusive"   , "init"      , "volatile"  , "focus_new" , "instances"        ,
   "match"       , "class"     , "spawn"     , "position"  , "force_screen"     ,
   "max_clients" , "exec_once" , "clone_on"  , "clone_of"  , "no_focus_stealing",
   "fallback"    , "no_focus_stealing_out","no_focus_stealing_in"
-},{},{},{},{},{},{}
+},{},{},{},{},{},{},awful.tag.getproperty
 
 for _,sig in ipairs(signals) do
     capi.tag.add_signal("property::"..sig)
@@ -75,26 +75,26 @@ end
 
 --Apply all properties
 local function apply_properties(c,override,normal)
-    local prop = awful.util.table.join(normal,override)
+    local props = awful.util.table.join(normal,override)
     --Set all 'c.something' properties
-    for k,_ in pairs(prop) do
-        prop[k] = (override[v] ~= nil) and override[k] or normal[k]
-        c[k] = prop[k]
+    for k,_ in pairs(props) do
+        props[k] = (override[v] ~= nil) and override[k] or normal[k]
+        c[k] = props[k]
     end
     --Force floating state, if necessary
-    if prop.floating ~= nil then
-        awful.client.floating.set(c, prop.floating)
+    if props.floating ~= nil then
+        awful.client.floating.set(c, props.floating)
     end
     --Center client
-    if prop.centered == true then
+    if props.centered == true then
         awful.placement.centered(c, nil)
     end
     --Focus new client
-    if prop.focus_new ~= false and (c.transient_for and not settings.block_transient_for_focus_stealing) then
+    if props.focus_new ~= false and (c.transient_for and not settings.block_transient_for_focus_stealing) then
         capi.client.focus = c
     end
     --Add to the current tag if the client is intrusive, ignore exclusive
-    if prop.intrusive == true or (settings.force_odd_as_intrusive and c.type ~= "normal") then
+    if props.intrusive == true or (settings.force_odd_as_intrusive and c.type ~= "normal") then
         local tag = awful.tag.selected(c.screen)
         if not tag then
             awful.tag.viewonly(awful.tag.gettags(c.screen)[1])
@@ -132,8 +132,8 @@ local function match_client(c, startup)
             local tag,cache = rules.tags[j],rules.tags[j].screen
             tag.instances,has_screen = tag.instances or {},(type(tag.screen)=="table" and awful.util.table.hasitem(tag.screen,c_src)~=nil)
             tag.screen = (tag.force_screen ~= true and c_src) or (has_screen and c_src or type(tag.screen)=="table" and tag.screen[1] or tag.screen)
-            tag.screen = (tag.screen <= capi.screen.count()) and tag.screen or mouse_s
-            if not tag.instances[tag.screen] and not (fav_scr == true and mouse_s ~= tag.screen) then
+            tag.screen,match = (tag.screen <= capi.screen.count()) and tag.screen or mouse_s,tag.instances[tag.screen]
+            if (not match and not (fav_scr == true and mouse_s ~= tag.screen)) or (match and (prop(match,"max_clients") or 999) <= #match:clients()) then
                 awful.tag.add(tag.name,tag)
             end
             tags_src[tag.screen],fav_scr = tags_src[tag.screen] or {},fav_scr or (tag.screen == mouse_s) --Reset if a better screen is found
@@ -141,13 +141,13 @@ local function match_client(c, startup)
             tag.screen = cache
         end
         for k,t in ipairs(tags_src[mouse_s] or tags_src[c_src] or select(2,next(tags_src)) or awful.util.table.join(unpack(tags_src))) do
-            tags[#tags+1] = awful.tag.getproperty(t,"locked") ~= true and t or nil --Do not add to locked tags
+            tags[#tags+1] = prop(t,"locked") ~= true and t or nil --Do not add to locked tags
         end
         c.screen = tags[1] and awful.tag.getscreen(tags[1]) or c_src
         if #tags > 0 then
             c:tags(tags)
-            if awful.tag.getproperty(tags[1],"focus_new") ~= false and not (c.transient_for and settings.block_transient_for_focus_stealing)
-              and not awful.tag.getproperty(tags[1],"no_focus_stealing_in") then
+            if prop(tags[1],"focus_new") ~= false and not (c.transient_for and settings.block_transient_for_focus_stealing)
+              and not prop(tags[1],"no_focus_stealing_in") then
                 awful.tag.viewonly(tags[1])
             end
             if not rules.properties.no_autofocus then
@@ -158,7 +158,7 @@ local function match_client(c, startup)
     end
     --Add to the current tag if not exclusive
     local cur_tag = awful.tag.selected(c.screen)
-    if cur_tag and awful.tag.getproperty(cur_tag,"exclusive") ~= true and awful.tag.getproperty(cur_tag,"locked") ~= true then
+    if cur_tag and prop(cur_tag,"exclusive") ~= true and prop(cur_tag,"locked") ~= true then
         c:tags({cur_tag})
         capi.client.focus = c
         return true
@@ -176,7 +176,7 @@ local function match_client(c, startup)
       and c.screen or 1,layout=settings.default_layout or awful.layout.suit.max})
     tmp.tags[#tmp.tags+1] = {name=c.class or "N/A",instances = {[c.screen]=tag},volatile=true,screen=c.screen,exclusive=true}
     c:tags({tag})
-    if awful.tag.getproperty(tag,"focus_on_new") ~= false then
+    if prop(tag,"focus_on_new") ~= false then
         awful.tag.viewonly(tag)
     end
 end
@@ -184,7 +184,7 @@ end
 capi.client.connect_signal("manage", match_client)
 
 capi.client.connect_signal("untagged", function (c, t)
-    if awful.tag.getproperty(t,"volatile") == true and #t:clients() == 0 then
+    if prop(t,"volatile") == true and #t:clients() == 0 then
         local rules = class_client[string.lower(c.class or "N/A")]
         for j=1,#(rules and rules.tags or {}) do
             rules.tags[j].instances[c.screen] = rules.tags[j].instances[c.screen] ~= t and rules.tags[j].instances[c.screen] or nil
@@ -215,8 +215,8 @@ awful.tag.add,awful.tag._setscreen = function(tag,props)
     props.screen,props.instances = props.screen or capi.mouse.screen,props.instances or {}
     props.mwfact,props.layout = props.mwfact or settings.mwfact,props.layout or settings.default_layout or awful.layout.max
     local t = awful.tag._add(tag,props)
-    if awful.tag.getproperty(t,"clone_on") and awful.tag.getproperty(t,"clone_on") ~= t.screen then
-        local t3 = awful.tag._add(tag,{screen = awful.tag.getproperty(t,"clone_on"), clone_of = t,icon=awful.tag.geticon(t)})
+    if prop(t,"clone_on") and prop(t,"clone_on") ~= t.screen then
+        local t3 = awful.tag._add(tag,{screen = prop(t,"clone_on"), clone_of = t,icon=awful.tag.geticon(t)})
         --TODO prevent clients from being added to the clone
     end
     fallbacks[#fallbacks+1] = props.fallback and t or nil
@@ -249,9 +249,9 @@ awful.tag.viewonly = function(t)
     if not t then return end
     if not awful.tag.getscreen(t) then awful.tag.setscreen(capi.mouse.screen) end
     awful.tag._viewonly(t)
-    if awful.tag.getproperty(t,"clone_of") then
-        awful.tag.swap(t,awful.tag.getproperty(t,"clone_of"))
-        awful.tag.viewonly(awful.tag.getproperty(t,"clone_of"))
+    if prop(t,"clone_of") then
+        awful.tag.swap(t,prop(t,"clone_of"))
+        awful.tag.viewonly(prop(t,"clone_of"))
     end
 end
 
