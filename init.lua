@@ -140,15 +140,15 @@ local function match_client(c, startup)
             tags_src[tag.screen][#tags_src[tag.screen]+1] = tag.instances[tag.screen]
             tag.screen = cache
         end
-        tags = tags_src[mouse_s] or tags_src[c_src] or select(2,next(tags_src)) or awful.util.table.join(unpack(tags_src))
+        for k,t in ipairs(tags_src[mouse_s] or tags_src[c_src] or select(2,next(tags_src)) or awful.util.table.join(unpack(tags_src))) do
+            tags[#tags+1] = awful.tag.getproperty(t,"locked") ~= true and t or nil --Do not add to locked tags
+        end
         c.screen = tags[1] and awful.tag.getscreen(tags[1]) or c_src
-        if #tags > 0 and tags[1] then
+        if #tags > 0 then
             c:tags(tags)
             if awful.tag.getproperty(tags[1],"focus_new") ~= false and not (c.transient_for and settings.block_transient_for_focus_stealing)
               and not awful.tag.getproperty(tags[1],"no_focus_stealing_in") then
                 awful.tag.viewonly(tags[1])
---             elseif awful.tag.getproperty(tags[1],"no_focus_stealing") then
---                 c.urgent = true --It is not Tyrannical job to decide if it is urgent or not
             end
             if not rules.properties.no_autofocus then
                 capi.client.focus = c
@@ -158,7 +158,7 @@ local function match_client(c, startup)
     end
     --Add to the current tag if not exclusive
     local cur_tag = awful.tag.selected(c.screen)
-    if cur_tag and awful.tag.getproperty(cur_tag,"exclusive") ~= true then
+    if cur_tag and awful.tag.getproperty(cur_tag,"exclusive") ~= true and awful.tag.getproperty(cur_tag,"locked") ~= true then
         c:tags({cur_tag})
         capi.client.focus = c
         return true
