@@ -11,7 +11,7 @@ local capi = {client = client , tag    = tag   , awesome = awesome,
 
 local signals,module,class_client,tags_hash,settings,sn_callback,fallbacks,prop = {
   "exclusive"   , "init"      , "volatile"  , "focus_new" , "instances"        ,
-  "match"       , "class"     , "spawn"     , "position"  , "force_screen"     ,
+  "locked"      , "class"     , "spawn"     , "position"  , "force_screen"     ,
   "max_clients" , "exec_once" , "clone_on"  , "clone_of"  , "no_focus_stealing",
   "fallback"    , "no_focus_stealing_out","no_focus_stealing_in"
 },{},{},{},{},{},{},awful.tag.getproperty
