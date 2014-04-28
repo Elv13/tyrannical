@@ -165,7 +165,7 @@ Then edit this section to fit your needs.
 | **clone_on**              | Create a clone on screen(s)                          | number or array  |
 | **exclusive**             | Allow only client from the "class" attributes        | boolean          |
 | **exec_once**             | Execute when the tag is first selected               | string (command) |
-| **force_screen**          | Force a screen                                       | number           |
+| **force_screen**          | Force a screen                                       | boolean          |
 | **hide**                  | Hide this tag from view                              | boolean          |
 | **icon**                  | Tag icon                                             | path             |
 | **init**                  | Create when awesome launch                           | boolean          |
