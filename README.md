@@ -203,6 +203,8 @@ Then edit this section to fit your needs.
 | **ontop**                 | Display on top of the normal layout layer      | boolean          |
 | **skip_taskbar**          | Do not add to tasklist                         | boolean          |
 | **sticky**                | Display in all tags                            | boolean          |
+| **master**                | Open a client as master (bigger)               | boolean          |
+| **slave**                 | Open a client as slave (smaller)               | boolean          |
 
  *Need default rc.lua modifications in the "client.connect_signal('focus')" section
 

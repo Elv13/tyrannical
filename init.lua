@@ -89,6 +89,10 @@ local function apply_properties(c,override,normal)
     if props.centered == true then
         awful.placement.centered(c, nil)
     end
+    --Set slave or master
+    if props.slave == true or props.master == true then
+        awful.client["set"..(props.slave and "slave" or "master")](c, true)
+    end
     --Focus new client
     if props.focus_new ~= false and (c.transient_for and not settings.block_transient_for_focus_stealing) then
         capi.client.focus = c
