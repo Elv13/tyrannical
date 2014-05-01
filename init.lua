@@ -1,7 +1,7 @@
 local setmetatable   = setmetatable
 local print  , pairs = print  , pairs
 local ipairs , type  = ipairs , type
-local string , unpack= string,unpack
+local string , unpack= string , unpack
 local awful = require("awful")
 
 local capi = {client = client , tag    = tag   , awesome = awesome,
@@ -78,7 +78,7 @@ local function apply_properties(c,override,normal)
     local props = awful.util.table.join(normal,override)
     --Set all 'c.something' properties
     for k,_ in pairs(props) do
-        props[k] = (override[v] ~= nil) and override[k] or normal[k]
+        if override[k] ~= nil then props[k] = override[k] else props[k] = normal[k] end
         c[k] = props[k]
     end
     --Force floating state, if necessary
@@ -114,16 +114,17 @@ end
 local function match_client(c, startup)
     if not c then return end
     local startup = startup == nil and capi.awesome.startup or startup
-    if c.startup_id and sn_callback[c.startup_id] and sn_callback[c.startup_id](c,startup) then return end
-    local low = string.lower(c.class or "N/A")
+    local props = (c.startup_id and sn_callback[c.startup_id]) and sn_callback[c.startup_id](c,startup) or {}
+
+    local low,tags = string.lower(c.class or "N/A"),props.tags or {props.tag}
     local rules = class_client[low]
-    if c.transient_for and settings.group_children == true then
+    if #tags == 0 and c.transient_for and settings.group_children == true then
         c.sticky = c.transient_for.sticky or false
         c:tags(c.transient_for:tags())
         capi.client.focus = c
         return
     elseif rules then
-        local ret = apply_properties(c,{},rules.properties)
+        local ret = apply_properties(c,props,rules.properties)
         if ret then
             if not rules.properties.no_autofocus then
                 capi.client.focus = c
@@ -131,8 +132,8 @@ local function match_client(c, startup)
             return ret
         end
         --Add to matches
-        local tags,tags_src,fav_scr,c_src,mouse_s = {},{},false,c.screen,capi.mouse.screen
-        for j=1,#(rules.tags or {}) do
+        local tags_src,fav_scr,c_src,mouse_s = {},false,c.screen,capi.mouse.screen
+        for j=1,#(#tags == 0 and rules.tags or {}) do
             local tag,cache = rules.tags[j],rules.tags[j].screen
             tag.instances,has_screen = tag.instances or {},(type(tag.screen)=="table" and awful.util.table.hasitem(tag.screen,c_src)~=nil)
             tag.screen = (tag.force_screen ~= true and c_src) or (has_screen and c_src or type(tag.screen)=="table" and tag.screen[1] or tag.screen)
