@@ -268,6 +268,10 @@ awful.tag.swap = function(tag1,tag2)
     awful.tag.move(idx2,tag1)
 end
 
+capi.tag.connect_signal("property::fallback",function(t)
+    fallbacks[awful.util.table.hasitem(fallbacks, t) or (#fallbacks+1)] = prop(t,"fallback") and t or nil
+end)
+
 --------------------------OBJECT GEARS---------------------------
 local getter = {properties   = setmetatable({}, {__newindex = function(table,k,v) load_property(k,v) end}),
                 settings     = settings, tags_by_name = tags_hash, sn_callback = sn_callback}
