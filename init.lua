@@ -206,7 +206,7 @@ awful.tag.withcurrent,awful.tag._add  = function(c, startup)
     c:tags(tags)
 end,awful.tag.add
 
-awful.tag.add,awful.tag._setscreen = function(tag,props)
+awful.tag.add,awful.tag._setscreen,awful.tag._viewonly = function(tag,props)
     props.screen,props.instances = props.screen or capi.mouse.screen,props.instances or setmetatable({}, { __mode = 'v' })
     props.mwfact,props.layout = props.mwfact or settings.mwfact,props.layout or settings.default_layout or awful.layout.max
     local t = awful.tag._add(tag,props)
@@ -219,26 +219,10 @@ awful.tag.add,awful.tag._setscreen = function(tag,props)
     t.selected = props.selected or false
     props.instances[props.screen] = t
     return t
-end,awful.tag.setscreen
+end,awful.tag.setscreen,awful.tag.viewonly
 
-awful.tag._viewonly = awful.tag.viewonly
-
--- Check is Awesome is 3.5.3+
-if capi.awesome.startup == nil then
-    -- Monkey patch a bug fixed in 3.5.3
-    awful.tag.setscreen = function(tag,screen)
-        if not tag or type(tag) ~= "tag" then return end
-        awful.tag._setscreen(tag,screen)
-        for k,c in ipairs(tag:clients()) do
-            c.screen = screen or 1 --Move all clients
-            c:tags({tag}) --Prevent some very strange side effects, does create some issue with multitag clients
-        end
-        awful.tag.history.restore(tag.screen,1)
-    end
-else
-    -- Restore the old behavior in newer Awesome
-    require("tyrannical.extra.request")
-end
+-- Patch Awesome < 3.5.3
+require("tyrannical.extra.legacy")
 
 awful.tag.viewonly = function(t)
     if not t then return end
@@ -248,14 +232,6 @@ awful.tag.viewonly = function(t)
         awful.tag.swap(t,prop(t,"clone_of"))
         awful.tag.viewonly(prop(t,"clone_of"))
     end
-end
-
-awful.tag.swap = function(tag1,tag2)
-    local idx1,idx2,scr2 = awful.tag.getidx(tag1),awful.tag.getidx(tag2),awful.tag.getscreen(tag2)
-    awful.tag.setscreen(tag2,awful.tag.getscreen(tag1))
-    awful.tag.move(idx1,tag2)
-    awful.tag.setscreen(tag1,scr2)
-    awful.tag.move(idx2,tag1)
 end
 
 capi.tag.connect_signal("property::fallback",function(t)
