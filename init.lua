@@ -6,6 +6,8 @@ local awful = require("awful")
 
 local capi = {client = client , tag    = tag   , awesome = awesome,
               screen = screen , mouse  = mouse                    }
+-- Patch Awesome < 3.5.3
+require("tyrannical.extra.legacy")
 
 -------------------------------INIT------------------------------
 
@@ -14,7 +16,7 @@ local signals,module,class_client,tags_hash,settings,sn_callback,fallbacks,prop 
   "locked"      , "class"     , "spawn"     , "position"  , "force_screen"     ,
   "max_clients" , "exec_once" , "clone_on"  , "clone_of"  , "no_focus_stealing",
   "fallback"    , "no_focus_stealing_out","no_focus_stealing_in"
-},{},{},{},{},{},{},awful.tag.getproperty
+},{},{},{},{},awful.spawn and awful.spawn.snid_buffer or {},{},awful.tag.getproperty
 
 for _,sig in ipairs(signals) do
     capi.tag.add_signal("property::"..sig)
@@ -76,18 +78,19 @@ end
 --Check all focus policies then change focus (Awesome 3.5.3+)
 function module.focus_client(c,properties)
     local properties = properties or (class_client[string.lower(c.class or "N/A")] or {}).properties or {}
-    if (((not c.transient_for) or (not settings.block_transient_for_focus_stealing)) and (not properties.no_autofocus)) then
-        if not awful.util.table.hasitem(c:tags(), awful.tag.selected(c.screen or 1)) and (not prop(tags[1],"no_focus_stealing_in")) then
+    if (((not c.transient_for) or (c.transient_for==capi.client.focus) or (not settings.block_children_focus_stealing)) and (not properties.no_autofocus)) then
+        if not awful.util.table.hasitem(c:tags(), awful.tag.selected(c.screen or 1)) and (not prop(c:tags()[1],"no_focus_stealing_in")) then
             awful.tag.viewonly(c:tags()[1])
         end
         capi.client.focus = c
+        c:raise()
     end
 end
 
 --Apply all properties
 local function apply_properties(c,override,normal)
     local props,ret = awful.util.table.join(normal,override),nil
-    --Set all 'c.something' properties
+    --Set all 'c.something' properties, --TODO maybe eventually move to awful.rules.execute
     for k,_ in pairs(props) do
         if override[k] ~= nil then props[k] = override[k] else props[k] = normal[k] end
         c[k] = props[k]
@@ -104,8 +107,10 @@ local function apply_properties(c,override,normal)
     if props.slave == true or props.master == true then
         awful.client["set"..(props.slave and "slave" or "master")](c, true)
     end
+    if props.new_tag then
+        ret = c:tags({awful.tag.add(type(props.new_tag)=="table" and props.new_tag.name or c.class,type(props.new_tag)=="table" and props.new_tag or {})})
     --Add to the current tag if the client is intrusive, ignore exclusive
-    if props.intrusive == true or (settings.force_odd_as_intrusive and c.type ~= "normal") then
+    elseif props.intrusive == true or (settings.force_odd_as_intrusive and c.type ~= "normal") then
         local tag = awful.tag.selected(c.screen) or awful.tag.viewonly(awful.tag.gettags(c.screen)[1]) or awful.tag.selected(c.screen)
         if tag then --Can be false if there is no tags
             ret = c:tags({tag})
@@ -118,7 +123,7 @@ end
 local function match_client(c, startup)
     if not c then return end
     local startup = startup == nil and capi.awesome.startup or startup
-    local props = (c.startup_id and sn_callback[c.startup_id]) and sn_callback[c.startup_id](c,startup) or {}
+    local props = c.startup_id and sn_callback[tostring(c.startup_id)] or {}
 
     local low,tags = string.lower(c.class or "N/A"),props.tags or {props.tag}
     local rules = class_client[low]
@@ -139,7 +144,7 @@ local function match_client(c, startup)
             tag.screen = (tag.force_screen ~= true and c_src) or (has_screen and c_src or type(tag.screen)=="table" and tag.screen[1] or tag.screen)
             tag.screen,match = (tag.screen <= capi.screen.count()) and tag.screen or mouse_s,tag.instances[tag.screen]
             if (not match and not (fav_scr == true and mouse_s ~= tag.screen)) or (match and (prop(match,"max_clients") or 999) <= #match:clients()) then
-                awful.tag.add(tag.name,tag)
+                awful.tag.setproperty(awful.tag.add(tag.name,tag),"volatile",match and (prop(match,"max_clients") ~= nil) or tag.volatile)
             end
             tags_src[tag.screen],fav_scr = tags_src[tag.screen] or {},fav_scr or (tag.screen == mouse_s) --Reset if a better screen is found
             tags_src[tag.screen][#tags_src[tag.screen]+1] = tag.instances[tag.screen]
@@ -220,9 +225,6 @@ awful.tag.add,awful.tag._setscreen,awful.tag._viewonly = function(tag,props)
     props.instances[props.screen] = t
     return t
 end,awful.tag.setscreen,awful.tag.viewonly
-
--- Patch Awesome < 3.5.3
-require("tyrannical.extra.legacy")
 
 awful.tag.viewonly = function(t)
     if not t then return end

@@ -52,7 +52,7 @@ can also to other value by using the class name as table key:
 Tyrannical focus model is very fine tuned. It is possible to add rules on how
 the focus will be attributes to clients and tags.
 
-**block_transient_for_focus_stealing:** 
+**block_children_focus_stealing:** 
 This is a fancy X11 name for something very common: modal dialogs and popups.
 If this is set to `true`, then a dialog wont be able to steal the focus from
 whatever your doing. This is useful for some misbehaving apps such as Firefox
@@ -277,7 +277,7 @@ Then edit this section to fit your needs.
 
 | Property                               | Description                                         | Type             |
 | -------------------------------------- | --------------------------------------------------- |:----------------:|
-| **block_transient_for_focus_stealing** | Prevent popups from stealing focus                  | boolean          |
+| **block_children_focus_stealing**      | Prevent popups from stealing focus                  | boolean          |
 | **default_layout**                     | The default layout for tags                         | layout           |
 | **group_children**                     | Add dialogs to the same tags as their parent client | boolean          |
 | **mwfact**                             | The default master/slave ratio                      | float (0-1)      |
@@ -319,6 +319,63 @@ automatically generated. You can then add it using
 name"].name,tyrannical.tags_by_name["your tag name"])```. Tyrannical's purpose
 is not to duplicate or change ```awful.tag``` behavior, it is simply a
 configuration wrapper.
+
+#### Is it possible to directly launch clients in the current tag or a new one?
+
+This feature is mostly available for Awesome 3.5.3+, 3.5.6+ is recommanded.
+Tyrannical will use the "startup notification" feild in clients that support it
+to track a spawn request. Some applications, such as GVim and XTerm, doesn't
+support this. URxvt, Konsole and Gnome terminal does.
+
+Here are some example:
+
+```lua
+    -- Spawn in a new tag
+    awful.util.spawn("urxvt",{new_tag=true})
+    
+    -- Or for more advanced use case, you can use a full tag definition too
+    awful.util.spawn("urxvt",{ new_tag= {
+       name = "MyNewTag",
+       exclusive = true,
+    })
+    
+    -- Spawn in the current tag, floating and on top
+    awful.util.spawn(terminal,{intrusive=true, floating=true, ontop=true})
+```
+
+For Awesome 3.5.6+, it is possible to replace the default mod4+r keybinding with
+a more powerful one:
+
+```lua
+    awful.key({ modkey }, "r",
+        function ()
+            awful.prompt.run({ prompt = "Run: ", hooks = {
+                {{         },"Return",function(command)
+                    local result = awful.util.spawn(command)
+                    mypromptbox[mouse.screen].widget:set_text(type(result) == "string" and result or "")
+                    return true
+                end},
+                {{"Mod1"   },"Return",function(command)
+                    local result = awful.util.spawn(command,{intrusive=true})
+                    mypromptbox[mouse.screen].widget:set_text(type(result) == "string" and result or "")
+                    return true
+                end},
+                {{"Shift"  },"Return",function(command)
+                    local result = awful.util.spawn(command,{intrusive=true,ontop=true,floating=true})
+                    mypromptbox[mouse.screen].widget:set_text(type(result) == "string" and result or "")
+                    return true
+                end}
+            }},
+            mypromptbox[mouse.screen].widget,nil,
+            awful.completion.shell,
+            awful.util.getdir("cache") .. "/history")
+        end),
+```
+
+When using this, instead of pressing `Return` to spawn the application, you can
+use `Alt+Return` to launch it as an `intrusive` client. You can add more sections
+to support more use case (such as `Shift+Return` to launch as `floating` as shown
+above)
 
 #### What is Tyrannical license?
 

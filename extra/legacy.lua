@@ -28,3 +28,34 @@ awful.tag.swap = function(tag1,tag2)
     awful.tag.setscreen(tag1,scr2)
     awful.tag.move(idx2,tag1)
 end
+
+-- Check if adding support for sn-based spawn is necessary
+if not awful.spawn then
+    awful.spawn = {snid_buffer={}}
+    function awful.util.spawn(cmd,sn_rules,callback)
+        if cmd and cmd ~= "" then
+            local enable_sn = (sn_rules ~= false or callback) and true or true
+            if not sn_rules and callback then
+                sn_rules = {callback=callback}
+            elseif callback then
+                sn_rules.callback = callback
+            end
+            local pid,snid = capi.awesome.spawn(cmd, enable_sn)
+            -- The snid will be nil in case of failure
+            if snid and type(sn_rules) == "table" then
+                awful.spawn.snid_buffer[snid] = sn_rules
+            end
+            return pid,snid
+        end
+        -- For consistency
+        return "Error: No command to execute"
+    end
+    local function on_canceled(sn)
+        awful.spawn.snid_buffer[sn] = nil
+    end
+    capi.awesome.connect_signal("spawn::canceled" , on_canceled  )
+    capi.awesome.connect_signal("spawn::timeout"  , on_canceled   )
+else
+    -- Then if it's there, disable the part we don't want
+    capi.client.disconnect_signal("manage",awful.spawn.on_snid_callback)
+end
