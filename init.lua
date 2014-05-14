@@ -11,12 +11,12 @@ require("tyrannical.extra.legacy")
 
 -------------------------------INIT------------------------------
 
-local signals,module,class_client,tags_hash,settings,sn_callback,fallbacks,prop = {
+local signals,module,class_client,instance_client,tags_hash,settings,sn_callback,fallbacks,prop = {
   "exclusive"   , "init"      , "volatile"  , "focus_new" , "instances"        ,
-  "locked"      , "class"     , "spawn"     , "position"  , "force_screen"     ,
+  "locked"      , "class"     , "instance"  , "spawn"     , "position"         , "force_screen"     ,
   "max_clients" , "exec_once" , "clone_on"  , "clone_of"  , "no_focus_stealing",
   "fallback"    , "no_focus_stealing_out","no_focus_stealing_in"
-},{},{},{},{},awful.spawn and awful.spawn.snid_buffer or {},{},awful.tag.getproperty
+},{},{},{},{},{},awful.spawn and awful.spawn.snid_buffer or {},{},awful.tag.getproperty
 
 for _,sig in ipairs(signals) do
     capi.tag.add_signal("property::"..sig)
@@ -61,6 +61,14 @@ local function load_tags(tyrannical_tags)
                 class_client[low] = tmp
             end
         end
+        if v.instance and instance_client then
+            for i=1,#v.instance do
+                local low = string.lower(v.instance[i])
+                local tmp = instance_client[low] or {tags={},properties={}}
+                tmp.tags[#tmp.tags+1] = v
+                instance_client[low] = tmp
+            end
+        end
         tags_hash[v.name or "N/A"] = v
     end
 end
@@ -77,7 +85,7 @@ end
 
 --Check all focus policies then change focus (Awesome 3.5.3+)
 function module.focus_client(c,properties)
-    local properties = properties or (class_client[string.lower(c.class or "N/A")] or {}).properties or {}
+    local properties = properties or (instance_client[string.lower(c.instance or "N/A")] or {}).properties or (class_client[string.lower(c.class or "N/A")] or {}).properties or {}
     if (((not c.transient_for) or (c.transient_for==capi.client.focus) or (not settings.block_children_focus_stealing)) and (not properties.no_autofocus)) then
         if not awful.util.table.hasitem(c:tags(), awful.tag.selected(c.screen or 1)) and (not prop(c:tags()[1],"no_focus_stealing_in")) then
             awful.tag.viewonly(c:tags()[1])
@@ -122,11 +130,18 @@ end
 --Match client
 local function match_client(c, startup)
     if not c then return end
+
     local startup = startup == nil and capi.awesome.startup or startup
     local props = c.startup_id and sn_callback[tostring(c.startup_id)] or {}
 
-    local low,tags = string.lower(c.class or "N/A"),props.tags or {props.tag}
-    local rules = class_client[low]
+    local low_i,low_c,tags = string.lower(c.instance or "N/A"),string.lower(c.class or "N/A"),props.tags or {props.tag}
+    local rules_i,rules_c = instance_client[low_i],class_client[low_c]
+    local low,rules = low_i,rules_i
+
+    if rules_i == nil then
+        low,rules = low_c,rules_c
+    end
+
     if #tags == 0 and c.transient_for and settings.group_children == true then
         c.sticky = c.transient_for.sticky or false
         c:tags(c.transient_for:tags())
@@ -173,8 +188,8 @@ local function match_client(c, startup)
         return module.focus_client(c,props)
     end
     --Last resort, create a new tag
-    class_client[low] = class_client[low] or {tags={},properties={}}
-    local tmp,tag = class_client[low],awful.tag.add(c.class or "N/A",{name=c.class or "N/A",volatile=true,exclusive=true,screen=(c.screen <= capi.screen.count())
+    class_client[low_c] = class_client[low_c] or {tags={},properties={}}
+    local tmp,tag = class_client[low_c],awful.tag.add(c.class or "N/A",{name=c.class or "N/A",volatile=true,exclusive=true,screen=(c.screen <= capi.screen.count())
       and c.screen or 1,layout=settings.default_layout or awful.layout.suit.max})
     tmp.tags[#tmp.tags+1] = {name=c.class or "N/A",instances = setmetatable({[c.screen]=tag}, { __mode = 'v' }),volatile=true,screen=c.screen,exclusive=true}
     c:tags({tag})
