@@ -12,6 +12,83 @@ much the same rule configuration, but without all the dynamic tag code. Note
 that dynamic tagging is now supported directly by awesome. Tyrannical support
 Awesome WM version 3.5 and higher.
 
+#### Tag model
+
+Tyrannical turn awful.rule upside down. Instead of having to define rules for
+specific classes or matches, you define an array of tags, each with their own
+set of properties and rules. When a new client will arrive, it will be matched
+with a set of tags without any client specific configuration.
+
+All tags can have one "current" state:
+
+ * **inclusive:** The default state. All new clients will be allowed
+ * **exclusive:** Clients have be part of the allowed classes to be added
+ * **locked:** No new clients will be allowed in the tag
+ * **fallback:** If a client cannot be added to the current tag, then it will go there
+
+These rules are bypassed by `intrusive` clients. In that case, the client will
+be allowed no matter what. If there is no fallback tag and the client cannot be
+added to an existing tag, then a new one will be created with the client class
+as name. If the tag is set to `volatile`, then it will be destroyed when the
+last client is closed. If set to `init`, it will be present by default even if
+there is nothing in it.
+
+#### Client properties model
+
+Tyrannical offer a bunch of dynamic table for each properties (see below).
+When a class is present in one of those table, clients will be assigned the
+properties from the table name. For example, if you add Firefox to
+`tyrannical.properties.floating`, then it will float by default. Specific values
+can also to other value by using the class name as table key:
+
+```lua
+    tyrannical.properties.maximized = {
+        amarok = false,
+    }
+```
+
+#### Focus model
+
+Tyrannical focus model is very fine tuned. It is possible to add rules on how
+the focus will be attributes to clients and tags.
+
+**block_children_focus_stealing:** 
+This is a fancy X11 name for something very common: modal dialogs and popups.
+If this is set to `true`, then a dialog wont be able to steal the focus from
+whatever your doing. This is useful for some misbehaving apps such as Firefox
+that can decide to show an update popup at the worst possible moment.
+
+**group_children:**
+While not directly related to focus, when using with `no_focus_stealing_out`,
+it allow new "children" clients to silently be added to their "parent" tag.
+A good taglist widgets such as Radical can take care of notifying the user
+without disturbing your workflow.
+
+**no_focus_stealing_in:**
+When a new client is added to a tag with `no_focus_stealing_in` set to true,
+then the tag wont be selected and the current one will be kept.
+
+**no_focus_stealing_out:**
+Similar to `no_focus_stealing_in`. If a tag enable this, then the tag will stay
+selected no matter what event happen. This is useful for video games and video
+players.
+
+**no_autofocus:**
+When a class has this flag, then new clients wont be focused when they are
+launched. This is useful for download managers or background terminals tasks.
+
+### Installation
+
+This is how to install Tyrannical
+
+```
+    mkdir -p ~/.config/awesome
+    cd ~/.config/awesome
+    git clone https://github.com/Elv13/tyrannical.git
+```
+
+Then either use the sample rc.lua or upgrade your existing one.
+
 ### Examples
 
 Install [Xephyr](http://www.freedesktop.org/wiki/Software/Xephyr) and run the
@@ -145,26 +222,30 @@ tyrannical.settings.group_children = true --Force popups/dialogs to have the sam
 
 Then edit this section to fit your needs. 
 
-##### That available tags properties are:
+##### The available tag properties are:
 
-| Property              | Description                                    | Type             |
-| --------------------- | ---------------------------------------------- |:----------------:|
-| **class**             | Match these classes to this tag                | array of string  |
-| **clone_on**          | Create a clone on screen(s)                    | number or array  |
-| **exclusive**         | Allow only client from the "class" attributes  | boolean          |
-| **exec_once**         | Execute when the tag is first selected         | string (command) |
-| **force_screen**      | Force a screen                                 | number           |
-| **hide**              | Hide this tag from view                        | boolean          |
-| **icon**              | Tag icon                                       | path             |
-| **init**              | Create when awesome launch                     | boolean          |
-| **layout**            | The tag layout                                 | layout           |
-| **mwfact**            | Tiled layout master/slave ratio                | float(0-1)       |
-| **ncol**              | Number of columns                              | number           |
-| **nmaster**           | Number of master clients                       | number           |
-| **no_focus_stealing** | Prevent tag from stealing focus on new clients | boolean          |
-| **screen**            | Tag screen(s)                                  | number or array  |
-| **selected**          | Select when created                            | boolean          |
-| **volatile**          | Destroy when the last client is closed         | boolean          |
+| Property                  | Description                                          | Type             |
+| ------------------------- | ---------------------------------------------------- |:----------------:|
+| **class**                 | Match these classes to this tag                      | array of string  |
+| **clone_on**              | Create a clone on screen(s)                          | number or array  |
+| **exclusive**             | Allow only client from the "class" attributes        | boolean          |
+| **exec_once**             | Execute when the tag is first selected               | string (command) |
+| **force_screen**          | Force a screen                                       | boolean          |
+| **hide**                  | Hide this tag from view                              | boolean          |
+| **icon**                  | Tag icon                                             | path             |
+| **init**                  | Create when awesome launch                           | boolean          |
+| **layout**                | The tag layout                                       | layout           |
+| **mwfact**                | Tiled layout master/slave ratio                      | float(0-1)       |
+| **ncol**                  | Number of columns                                    | number           |
+| **nmaster**               | Number of master clients                             | number           |
+| **no_focus_stealing_in**  | Do not select this tag when a new client is added    | boolean          |
+| **no_focus_stealing_out** | Do not unselect when a new client is added elsewhere | boolean          |
+| **screen**                | Tag screen(s)                                        | number or array  |
+| **selected**              | Select when created                                  | boolean          |
+| **volatile**              | Destroy when the last client is closed               | boolean          |
+| **fallback**              | Use this tag for unmatched clients                   | boolean          |
+| **locked**                | Do not add any more clients to this tag              | boolean          |
+| **max_clients**           | Maximum number of clients before creating a new tag  | number           |
 
 
 ##### The available client properties are:
@@ -186,17 +267,23 @@ Then edit this section to fit your needs.
 | **ontop**                 | Display on top of the normal layout layer      | boolean          |
 | **skip_taskbar**          | Do not add to tasklist                         | boolean          |
 | **sticky**                | Display in all tags                            | boolean          |
+| **master**                | Open a client as master (bigger)               | boolean          |
+| **slave**                 | Open a client as slave (smaller)               | boolean          |
+| **no_autofocus**          | Do not focus a new instance                    | boolean          |
 
  *Need default rc.lua modifications in the "client.connect_signal('focus')" section
 
 ##### The available global settings are:
 
-| Property                          | Description                                         | Type             |
-| --------------------------------- | --------------------------------------------------- |:----------------:|
-| **block_children_focus_stealing** | Prevent popups from stealing focus                  | boolean          |
-| **default_layout**                | The default layout for tags                         | layout           |
-| **group_children**                | Add dialogs to the same tags as their parent client | boolean          |
-| **mwfact**                        | The default master/slave ratio                      | float (0-1)      |
+| Property                               | Description                                         | Type             |
+| -------------------------------------- | --------------------------------------------------- |:----------------:|
+| **block_children_focus_stealing**      | Prevent popups from stealing focus                  | boolean          |
+| **default_layout**                     | The default layout for tags                         | layout           |
+| **group_children**                     | Add dialogs to the same tags as their parent client | boolean          |
+| **mwfact**                             | The default master/slave ratio                      | float (0-1)      |
+| **force_odd_as_intrusive**             | Make all non-normal (dock, splash) intrusive        | boolean          |
+| **no_focus_stealing_out**              | Do not unselect tags when a new client is added     | boolean          |
+
 
 It's worth noting that some settings like `mwfact` and `default_layout` should
 be set **before** the tag arrow. Otherwise they wont take effect at startup.
@@ -212,6 +299,12 @@ anymore. Awful's dynamic tag implementation is compatible with Tyrannical. See
 the [API](http://awesome.naquadah.org/doc/api/) and this
 [user contribution](https://github.com/Elv13/tyrannical/issues/15#issuecomment-18227575)
 
+#### How do I get a client class?
+
+From a terminal, execute `xprop`, then click on an instance of that client.
+There will be a "CLASS" line with one or more class. Always pick the second one,
+Tyrannical is not case sensitive.
+
 #### Is it possible to have relative indexes (position) for tags?
 
 Tyrannical shares awful's tag list. It does not keep its own indexes since this
@@ -226,6 +319,63 @@ automatically generated. You can then add it using
 name"].name,tyrannical.tags_by_name["your tag name"])```. Tyrannical's purpose
 is not to duplicate or change ```awful.tag``` behavior, it is simply a
 configuration wrapper.
+
+#### Is it possible to directly launch clients in the current tag or a new one?
+
+This feature is mostly available for Awesome 3.5.3+, 3.5.6+ is recommanded.
+Tyrannical will use the "startup notification" feild in clients that support it
+to track a spawn request. Some applications, such as GVim and XTerm, doesn't
+support this. URxvt, Konsole and Gnome terminal does.
+
+Here are some example:
+
+```lua
+    -- Spawn in a new tag
+    awful.util.spawn("urxvt",{new_tag=true})
+    
+    -- Or for more advanced use case, you can use a full tag definition too
+    awful.util.spawn("urxvt",{ new_tag= {
+       name = "MyNewTag",
+       exclusive = true,
+    })
+    
+    -- Spawn in the current tag, floating and on top
+    awful.util.spawn(terminal,{intrusive=true, floating=true, ontop=true})
+```
+
+For Awesome 3.5.6+, it is possible to replace the default mod4+r keybinding with
+a more powerful one:
+
+```lua
+    awful.key({ modkey }, "r",
+        function ()
+            awful.prompt.run({ prompt = "Run: ", hooks = {
+                {{         },"Return",function(command)
+                    local result = awful.util.spawn(command)
+                    mypromptbox[mouse.screen].widget:set_text(type(result) == "string" and result or "")
+                    return true
+                end},
+                {{"Mod1"   },"Return",function(command)
+                    local result = awful.util.spawn(command,{intrusive=true})
+                    mypromptbox[mouse.screen].widget:set_text(type(result) == "string" and result or "")
+                    return true
+                end},
+                {{"Shift"  },"Return",function(command)
+                    local result = awful.util.spawn(command,{intrusive=true,ontop=true,floating=true})
+                    mypromptbox[mouse.screen].widget:set_text(type(result) == "string" and result or "")
+                    return true
+                end}
+            }},
+            mypromptbox[mouse.screen].widget,nil,
+            awful.completion.shell,
+            awful.util.getdir("cache") .. "/history")
+        end),
+```
+
+When using this, instead of pressing `Return` to spawn the application, you can
+use `Alt+Return` to launch it as an `intrusive` client. You can add more sections
+to support more use case (such as `Shift+Return` to launch as `floating` as shown
+above)
 
 #### What is Tyrannical license?
 
