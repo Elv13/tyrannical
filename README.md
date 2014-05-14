@@ -140,6 +140,7 @@ tyrannical.tags = {
         exclusive   = true,                   -- Refuse any other type of clients (by classes)
         screen      = {1,2},                  -- Create this tag on screen 1 and screen 2
         layout      = awful.layout.suit.tile, -- Use the tile layout
+		instance    = {"dev", "ops"},         -- Accept the following instances. This takes precedence over 'class'
         class       = { --Accept the following classes, refuse everything else (because of "exclusive=true")
             "xterm" , "urxvt" , "aterm","URxvt","XTerm","konsole","terminator","gnome-terminal"
         }
@@ -224,28 +225,29 @@ Then edit this section to fit your needs.
 
 ##### The available tag properties are:
 
-| Property                  | Description                                          | Type             |
-| ------------------------- | ---------------------------------------------------- |:----------------:|
-| **class**                 | Match these classes to this tag                      | array of string  |
-| **clone_on**              | Create a clone on screen(s)                          | number or array  |
-| **exclusive**             | Allow only client from the "class" attributes        | boolean          |
-| **exec_once**             | Execute when the tag is first selected               | string (command) |
-| **force_screen**          | Force a screen                                       | boolean          |
-| **hide**                  | Hide this tag from view                              | boolean          |
-| **icon**                  | Tag icon                                             | path             |
-| **init**                  | Create when awesome launch                           | boolean          |
-| **layout**                | The tag layout                                       | layout           |
-| **mwfact**                | Tiled layout master/slave ratio                      | float(0-1)       |
-| **ncol**                  | Number of columns                                    | number           |
-| **nmaster**               | Number of master clients                             | number           |
-| **no_focus_stealing_in**  | Do not select this tag when a new client is added    | boolean          |
-| **no_focus_stealing_out** | Do not unselect when a new client is added elsewhere | boolean          |
-| **screen**                | Tag screen(s)                                        | number or array  |
-| **selected**              | Select when created                                  | boolean          |
-| **volatile**              | Destroy when the last client is closed               | boolean          |
-| **fallback**              | Use this tag for unmatched clients                   | boolean          |
-| **locked**                | Do not add any more clients to this tag              | boolean          |
-| **max_clients**           | Maximum number of clients before creating a new tag  | number           |
+| Property                  | Description                                                    | Type             |
+| ------------------------- | -------------------------------------------------------------- |:----------------:|
+| **class**                 | Match these classes to this tag                                | array of string  |
+| **clone_on**              | Create a clone on screen(s)                                    | number or array  |
+| **exclusive**             | Allow only client from the "class" attributes                  | boolean          |
+| **exec_once**             | Execute when the tag is first selected                         | string (command) |
+| **force_screen**          | Force a screen                                                 | boolean          |
+| **hide**                  | Hide this tag from view                                        | boolean          |
+| **icon**                  | Tag icon                                                       | path             |
+| **init**                  | Create when awesome launch                                     | boolean          |
+| **instance**              | Match these instances to this tag. Takes precedence over class | array of string  |
+| **layout**                | The tag layout                                                 | layout           |
+| **mwfact**                | Tiled layout master/slave ratio                                | float(0-1)       |
+| **ncol**                  | Number of columns                                              | number           |
+| **nmaster**               | Number of master clients                                       | number           |
+| **no_focus_stealing_in**  | Do not select this tag when a new client is added              | boolean          |
+| **no_focus_stealing_out** | Do not unselect when a new client is added elsewhere           | boolean          |
+| **screen**                | Tag screen(s)                                                  | number or array  |
+| **selected**              | Select when created                                            | boolean          |
+| **volatile**              | Destroy when the last client is closed                         | boolean          |
+| **fallback**              | Use this tag for unmatched clients                             | boolean          |
+| **locked**                | Do not add any more clients to this tag                        | boolean          |
+| **max_clients**           | Maximum number of clients before creating a new tag            | number           |
 
 
 ##### The available client properties are:
