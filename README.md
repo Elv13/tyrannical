@@ -247,7 +247,7 @@ Then edit this section to fit your needs.
 | **volatile**              | Destroy when the last client is closed               | boolean          |
 | **fallback**              | Use this tag for unmatched clients                   | boolean          |
 | **locked**                | Do not add any more clients to this tag              | boolean          |
-| **max_clients**           | Maximum number of clients before creating a new tag  | number           |
+| **max_clients**           | Maximum number of clients before creating a new tag  | number or func   |
 
 ★Takes precedence over class
 
@@ -322,6 +322,28 @@ automatically generated. You can then add it using
 name"].name,tyrannical.tags_by_name["your tag name"])```. Tyrannical's purpose
 is not to duplicate or change ```awful.tag``` behavior, it is simply a
 configuration wrapper.
+
+#### Is it possible to change the layout when adding a new client?
+
+Yes and no. There is a workaround using a `max_clients` callback. This function
+has to return a number of clients for a given tag, but can also be used to alter
+them. The function take a client as first parameter and a possible tag as the
+second. Returning `0` will always force a new tag to be created. Returning nil
+will allow the client into that tag. This function switch between `tile` and
+`magnifier`:
+
+```lua
+    local function five_layout(c,tag)
+        local count = #match:clients() + 1 --The client is not there yet
+        if count == 2 then
+            awful.layout.set(awful.layout.suit.tile,tag)
+            awful.tag.setproperty(tag,"mwfact",0.5)
+        else
+            awful.layout.set(awful.layout.suit.magnifier,tag)
+        end
+        return 5 -- Use a maximum of 5 clients
+    end
+```
 
 #### Is it possible to directly launch clients in the current tag or a new one?
 

@@ -58,7 +58,7 @@ local function load_tags(tyrannical_tags)
                 for i=1,#v[prop] do
                     local low = string.lower(v[prop][i])
                     local tmp = c_rules[prop][low] or {tags={},properties={}}
-                    tmp.tags[#tmp.tags+1] = v
+                    tmp.tags[#tmp.tags+1] = awful.util.table.hasitem(tmp.tags,v) == nil and v or nil --Avoid duplicates
                     c_rules[prop][low] = tmp
                 end
             end
@@ -147,8 +147,9 @@ local function match_client(c, startup)
             tag.instances,has_screen = tag.instances or setmetatable({}, { __mode = 'v' }),(type(tag.screen)=="table" and awful.util.table.hasitem(tag.screen,c_src)~=nil)
             tag.screen = (tag.force_screen ~= true and c_src) or (has_screen and c_src or type(tag.screen)=="table" and tag.screen[1] or tag.screen)
             tag.screen,match = (tag.screen <= capi.screen.count()) and tag.screen or mouse_s,tag.instances[tag.screen]
-            if (not match and not (fav_scr == true and mouse_s ~= tag.screen)) or (match and (prop(match,"max_clients") or 999) <= #match:clients()) then
-                awful.tag.setproperty(awful.tag.add(tag.name,tag),"volatile",match and (prop(match,"max_clients") ~= nil) or tag.volatile)
+            local max_clients = match and (type(prop(match,"max_clients")) == "function" and prop(match,"max_clients")(c,match) or prop(match,"max_clients")) or 999
+            if (not match and not (fav_scr == true and mouse_s ~= tag.screen)) or (max_clients <= #match:clients()) then
+                awful.tag.setproperty(awful.tag.add(tag.name,tag),"volatile",match and (max_clients ~= nil) or tag.volatile)
             end
             tags_src[tag.screen],fav_scr = tags_src[tag.screen] or {},fav_scr or (tag.screen == mouse_s) --Reset if a better screen is found
             tags_src[tag.screen][#tags_src[tag.screen]+1] = tag.instances[tag.screen]
