@@ -140,7 +140,7 @@ tyrannical.tags = {
         exclusive   = true,                   -- Refuse any other type of clients (by classes)
         screen      = {1,2},                  -- Create this tag on screen 1 and screen 2
         layout      = awful.layout.suit.tile, -- Use the tile layout
-		instance    = {"dev", "ops"},         -- Accept the following instances. This takes precedence over 'class'
+        instance    = {"dev", "ops"},         -- Accept the following instances. This takes precedence over 'class'
         class       = { --Accept the following classes, refuse everything else (because of "exclusive=true")
             "xterm" , "urxvt" , "aterm","URxvt","XTerm","konsole","terminator","gnome-terminal"
         }
@@ -226,7 +226,7 @@ Then edit this section to fit your needs.
 ##### The available tag properties are:
 
 | Property                  | Description                                          | Type             |
-| ------------------------- | -----------------------------------------------------|:----------------:|
+| ------------------------- | ---------------------------------------------------- |:----------------:|
 | **class**                 | Match these classes to this tag                      | array of string  |
 | **instance**              | Match these instances to this tag. ★                 | array of string  |
 | **clone_on**              | Create a clone on screen(s)                          | number or array  |
