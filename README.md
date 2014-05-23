@@ -225,30 +225,31 @@ Then edit this section to fit your needs.
 
 ##### The available tag properties are:
 
-| Property                  | Description                                                    | Type             |
-| ------------------------- | -------------------------------------------------------------- |:----------------:|
-| **class**                 | Match these classes to this tag                                | array of string  |
-| **clone_on**              | Create a clone on screen(s)                                    | number or array  |
-| **exclusive**             | Allow only client from the "class" attributes                  | boolean          |
-| **exec_once**             | Execute when the tag is first selected                         | string (command) |
-| **force_screen**          | Force a screen                                                 | boolean          |
-| **hide**                  | Hide this tag from view                                        | boolean          |
-| **icon**                  | Tag icon                                                       | path             |
-| **init**                  | Create when awesome launch                                     | boolean          |
-| **instance**              | Match these instances to this tag. Takes precedence over class | array of string  |
-| **layout**                | The tag layout                                                 | layout           |
-| **mwfact**                | Tiled layout master/slave ratio                                | float(0-1)       |
-| **ncol**                  | Number of columns                                              | number           |
-| **nmaster**               | Number of master clients                                       | number           |
-| **no_focus_stealing_in**  | Do not select this tag when a new client is added              | boolean          |
-| **no_focus_stealing_out** | Do not unselect when a new client is added elsewhere           | boolean          |
-| **screen**                | Tag screen(s)                                                  | number or array  |
-| **selected**              | Select when created                                            | boolean          |
-| **volatile**              | Destroy when the last client is closed                         | boolean          |
-| **fallback**              | Use this tag for unmatched clients                             | boolean          |
-| **locked**                | Do not add any more clients to this tag                        | boolean          |
-| **max_clients**           | Maximum number of clients before creating a new tag            | number           |
+| Property                  | Description                                          | Type             |
+| ------------------------- | -----------------------------------------------------|:----------------:|
+| **class**                 | Match these classes to this tag                      | array of string  |
+| **instance**              | Match these instances to this tag. ★                 | array of string  |
+| **clone_on**              | Create a clone on screen(s)                          | number or array  |
+| **exclusive**             | Allow only client from the "class" attributes        | boolean          |
+| **exec_once**             | Execute when the tag is first selected               | string (command) |
+| **force_screen**          | Force a screen                                       | boolean          |
+| **hide**                  | Hide this tag from view                              | boolean          |
+| **icon**                  | Tag icon                                             | path             |
+| **init**                  | Create when awesome launch                           | boolean          |
+| **layout**                | The tag layout                                       | layout           |
+| **mwfact**                | Tiled layout master/slave ratio                      | float(0-1)       |
+| **ncol**                  | Number of columns                                    | number           |
+| **nmaster**               | Number of master clients                             | number           |
+| **no_focus_stealing_in**  | Do not select this tag when a new client is added    | boolean          |
+| **no_focus_stealing_out** | Do not unselect when a new client is added elsewhere | boolean          |
+| **screen**                | Tag screen(s)                                        | number or array  |
+| **selected**              | Select when created                                  | boolean          |
+| **volatile**              | Destroy when the last client is closed               | boolean          |
+| **fallback**              | Use this tag for unmatched clients                   | boolean          |
+| **locked**                | Do not add any more clients to this tag              | boolean          |
+| **max_clients**           | Maximum number of clients before creating a new tag  | number           |
 
+★Takes precedence over class
 
 ##### The available client properties are:
 
@@ -325,7 +326,7 @@ configuration wrapper.
 #### Is it possible to directly launch clients in the current tag or a new one?
 
 This feature is mostly available for Awesome 3.5.3+, 3.5.6+ is recommanded.
-Tyrannical will use the "startup notification" feild in clients that support it
+Tyrannical will use the "startup notification" field in clients that support it
 to track a spawn request. Some applications, such as GVim and XTerm, doesn't
 support this. URxvt, Konsole and Gnome terminal does.
 
