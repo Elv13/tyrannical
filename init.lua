@@ -33,6 +33,10 @@ local function on_selected_change(tag,data)
     end
 end
 
+local function get_class(c)
+    return awful.client.property.get(c, "overwrite_class") or c.class or "N/A"
+end
+
 --Load tags, this cannot be undone
 local function load_tags(tyrannical_tags)
     for k,v in ipairs(tyrannical_tags) do
@@ -79,7 +83,7 @@ end
 
 --Check all focus policies then change focus (Awesome 3.5.3+)
 function module.focus_client(c,properties)
-    local properties = properties or (c_rules.instance[string.lower(c.instance or "N/A")] or {}).properties or (c_rules.class[string.lower(c.class or "N/A")] or {}).properties or {}
+    local properties = properties or (c_rules.instance[string.lower(c.instance or "N/A")] or {}).properties or (c_rules.class[string.lower(get_class(c))] or {}).properties or {}
     if (((not c.transient_for) or (c.transient_for==capi.client.focus) or (not settings.block_children_focus_stealing)) and (not properties.no_autofocus)) then
         if not awful.util.table.hasitem(c:tags(), awful.tag.selected(c.screen or 1)) and (not prop(c:tags()[1],"no_focus_stealing_in")) then
             awful.tag.viewonly(c:tags()[1])
@@ -128,7 +132,9 @@ local function match_client(c, startup)
     local startup = startup == nil and capi.awesome.startup or startup
     local props = c.startup_id and sn_callback[tostring(c.startup_id)] or {}
 
-    local low_i,low_c,tags = string.lower(c.instance or "N/A"),string.lower(c.class or "N/A"),props.tags or {props.tag}
+    local low_i = string.lower(c.instance or "N/A")
+    local low_c = string.lower(get_class(c))
+    local tags = props.tags or {props.tag}
     local rules = c_rules.instance[low_i] or c_rules.class[low_c]
 
     if #tags == 0 and c.transient_for and settings.group_children == true then
@@ -179,9 +185,9 @@ local function match_client(c, startup)
     end
     --Last resort, create a new tag
     c_rules.class[low_c] = c_rules.class[low_c] or {tags={},properties={}}
-    local tmp,tag = c_rules.class[low_c],awful.tag.add(c.class or "N/A",{name=c.class or "N/A",volatile=true,exclusive=true,screen=(c.screen <= capi.screen.count())
+    local tmp,tag = c_rules.class[low_c],awful.tag.add(get_class(c),{name=get_class(c),volatile=true,exclusive=true,screen=(c.screen <= capi.screen.count())
       and c.screen or 1,layout=settings.default_layout or awful.layout.suit.max})
-    tmp.tags[#tmp.tags+1] = {name=c.class or "N/A",instances = setmetatable({[c.screen]=tag}, { __mode = 'v' }),volatile=true,screen=c.screen,exclusive=true}
+    tmp.tags[#tmp.tags+1] = {name=get_class(c),instances = setmetatable({[c.screen]=tag}, { __mode = 'v' }),volatile=true,screen=c.screen,exclusive=true}
     c:tags({tag})
     return module.focus_client(c,props)
 end
@@ -190,7 +196,7 @@ capi.client.connect_signal("manage", match_client)
 
 capi.client.connect_signal("untagged", function (c, t)
     if prop(t,"volatile") == true and #t:clients() == 0 then
-        local rules = c_rules.class[string.lower(c.class or "N/A")]
+        local rules = c_rules.class[string.lower(get_class(c))]
         for j=1,#(rules and rules.tags or {}) do
             rules.tags[j].instances[c.screen] = rules.tags[j].instances[c.screen] ~= t and rules.tags[j].instances[c.screen] or nil
         end
