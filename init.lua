@@ -95,7 +95,7 @@ end
 
 --Apply all properties
 local function apply_properties(c,override,normal)
-    local props,ret = awful.util.table.join(normal,override),nil
+    local props,ret = awful.util.table.join(normal,override,override.callback and override.callback(c) or (normal.callback and normal.callback(c)) or {}),nil
     --Set all 'c.something' properties, --TODO maybe eventually move to awful.rules.execute
     for k,_ in pairs(props) do
         if override[k] ~= nil then props[k] = override[k] else props[k] = normal[k] end
@@ -113,11 +113,11 @@ local function apply_properties(c,override,normal)
     if props.slave == true or props.master == true then
         awful.client["set"..(props.slave and "slave" or "master")](c, true)
     end
+    --Check if the client should be added to an existing tag (or tags)
     if props.new_tag then
         ret = c:tags({awful.tag.add(type(props.new_tag)=="table" and props.new_tag.name or c.class,type(props.new_tag)=="table" and props.new_tag or {})})
     elseif props.tag then
         ret = c:tags(type(props.tag) == "function" and props.tag(c) or (type(props.tag) == "table" and props.tag or { props.tag }))
-    --Add to the current tag if the client is intrusive, ignore exclusive
     elseif props.intrusive == true or (settings.force_odd_as_intrusive and c.type ~= "normal") then
         local tag = awful.tag.selected(c.screen) or awful.tag.viewonly(awful.tag.gettags(c.screen)[1]) or awful.tag.selected(c.screen)
         if tag then --Can be false if there is no tags

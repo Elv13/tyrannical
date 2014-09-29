@@ -273,6 +273,7 @@ Then edit this section to fit your needs.
 | **no_autofocus**          | Do not focus a new instance                    | boolean          |
 | **tag**                   | Asign to a pre-existing tag object             | tag/func/array   |
 | **new_tag**               | Do not focus a new instance                    | boolean or array |
+| **callback**              | A function returning an array or properties    | function         |
 
  *Need default rc.lua modifications in the "client.connect_signal('focus')" section
 
@@ -406,6 +407,14 @@ When using this, instead of pressing `Return` to spawn the application, you can
 use `Alt+Return` to launch it as an `intrusive` client. You can add more sections
 to support more use case (such as `Shift+Return` to launch as `floating` as shown
 above)
+
+#### Can I alter the client properties based on runtime criterias?
+
+Yes, everytime Tyrannical consider a client, it will call the `callback` function.
+This function can return an array or properties that will have precedence over
+any properties set by rules. The only limitation of this system is that the
+callback function need to be synchronious. So long bash commands will cause
+Awesome to block until the result is parsed.
 
 #### What is Tyrannical license?
 
