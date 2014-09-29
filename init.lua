@@ -229,10 +229,6 @@ awful.tag.add,awful.tag._setscreen,awful.tag._viewonly = function(tag,props)
     props.screen,props.instances = props.screen or capi.mouse.screen,props.instances or setmetatable({}, { __mode = 'v' })
     props.mwfact,props.layout = props.mwfact or settings.mwfact,props.layout or settings.default_layout or awful.layout.max
     local t = awful.tag._add(tag,props)
-    if prop(t,"clone_on") and prop(t,"clone_on") ~= t.screen then
-        local t3 = awful.tag._add(tag,{screen = prop(t,"clone_on"), clone_of = t,icon=awful.tag.geticon(t)})
-        --TODO prevent clients from being added to the clone
-    end
     fallbacks[#fallbacks+1] = props.fallback and t or nil
     t:connect_signal("property::selected", function(t) on_selected_change(t,props or {}) end)
     t.selected = props.selected or false
@@ -244,10 +240,6 @@ awful.tag.viewonly = function(t)
     if not t then return end
     if not awful.tag.getscreen(t) then awful.tag.setscreen(capi.mouse.screen) end
     awful.tag._viewonly(t)
-    if prop(t,"clone_of") then
-        awful.tag.swap(t,prop(t,"clone_of"))
-        awful.tag.viewonly(prop(t,"clone_of"))
-    end
 end
 
 capi.tag.connect_signal("property::fallback",function(t)

@@ -172,8 +172,6 @@ tyrannical.tags = {
         init        = true,
         exclusive   = true,
         screen      = 1,
-        clone_on    = 2, -- Create a single instance of this tag on screen 1, but also show it on screen 2
-                         -- The tag can be used on both screen, but only one at once
         layout      = awful.layout.suit.max                          ,
         class ={ 
             "Kate", "KDevelop", "Codeblocks", "Code::Blocks" , "DDD", "kate4"}
@@ -229,7 +227,6 @@ Then edit this section to fit your needs.
 | ------------------------- | ---------------------------------------------------- |:----------------:|
 | **class**                 | Match these classes to this tag                      | array of string  |
 | **instance**              | Match these instances to this tag. ★                 | array of string  |
-| **clone_on**              | Create a clone on screen(s)                          | number or array  |
 | **exclusive**             | Allow only client from the "class" attributes        | boolean          |
 | **exec_once**             | Execute when the tag is first selected               | string (command) |
 | **force_screen**          | Force a screen                                       | boolean          |
