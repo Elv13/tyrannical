@@ -296,6 +296,13 @@ be set **before** the tag arrow. Otherwise they wont take effect at startup.
 
 ### FAQ
 
+ * [Is it possible to add, remove and move tags?](https://github.com/Elv13/tyrannical#is-it-possible-to-add-remove-and-move-tags)
+ * [How do I get a client class?](https://github.com/Elv13/tyrannical#how-do-i-get-a-client-class)
+ * [Is it possible to have relative indexes (position) for tags?](https://github.com/Elv13/tyrannical#is-it-possible-to-have-relative-indexes-position-for-tags)
+ * [Is it possible to change the layout when adding a new client?](https://github.com/Elv13/tyrannical#is-it-possible-to-change-the-layout-when-adding-a-new-client)
+ * [Is it possible to directly launch clients in the current tag or a new one?](https://github.com/Elv13/tyrannical#is-it-possible-to-directly-launch-clients-in-the-current-tag-or-a-new-one)
+ * [Can I alter the client properties based on runtime criterias?](https://github.com/Elv13/tyrannical#can-i-alter-the-client-properties-based-on-runtime-criterias)
+
 #### Is it possible to add, remove and move tags?
 
 Yes, this feature is now part of awful. It does not require an external module
