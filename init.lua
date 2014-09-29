@@ -15,7 +15,7 @@ local signals,module,c_rules,tags_hash,settings,sn_callback,fallbacks,prop = {
   "exclusive"   , "init"      , "volatile"  , "focus_new" , "instances"        ,
   "locked"      , "class"     , "instance"  , "spawn"     , "position"         , "force_screen"     ,
   "max_clients" , "exec_once" , "clone_on"  , "clone_of"  , "no_focus_stealing",
-  "fallback"    , "no_focus_stealing_out","no_focus_stealing_in"
+  "fallback"    , "no_focus_stealing_out"   ,"no_focus_stealing_in"
 },{},{class={},instance={}},{},{},awful.spawn and awful.spawn.snid_buffer or {},{},awful.tag.getproperty
 
 for _,sig in ipairs(signals) do
@@ -115,6 +115,8 @@ local function apply_properties(c,override,normal)
     end
     if props.new_tag then
         ret = c:tags({awful.tag.add(type(props.new_tag)=="table" and props.new_tag.name or c.class,type(props.new_tag)=="table" and props.new_tag or {})})
+    elseif props.tag then
+        ret = c:tags(type(props.tag) == "function" and props.tag(c) or (type(props.tag) == "table" and props.tag or { props.tag }))
     --Add to the current tag if the client is intrusive, ignore exclusive
     elseif props.intrusive == true or (settings.force_odd_as_intrusive and c.type ~= "normal") then
         local tag = awful.tag.selected(c.screen) or awful.tag.viewonly(awful.tag.gettags(c.screen)[1]) or awful.tag.selected(c.screen)
@@ -128,7 +130,6 @@ end
 --Match client
 local function match_client(c, startup)
     if not c then return end
-
     local startup = startup == nil and capi.awesome.startup or startup
     local props = c.startup_id and sn_callback[tostring(c.startup_id)] or {}
 
@@ -185,7 +186,7 @@ local function match_client(c, startup)
     end
     --Last resort, create a new tag
     c_rules.class[low_c] = c_rules.class[low_c] or {tags={},properties={}}
-    local tmp,tag = c_rules.class[low_c],awful.tag.add(get_class(c),{name=get_class(c),volatile=true,exclusive=true,screen=(c.screen <= capi.screen.count())
+    local tmp,tag = c_rules.class[low_c],awful.tag.add(get_class(c),{name=get_class(c),onetimer=true,volatile=true,exclusive=true,screen=(c.screen <= capi.screen.count())
       and c.screen or 1,layout=settings.default_layout or awful.layout.suit.max})
     tmp.tags[#tmp.tags+1] = {name=get_class(c),instances = setmetatable({[c.screen]=tag}, { __mode = 'v' }),volatile=true,screen=c.screen,exclusive=true}
     c:tags({tag})
@@ -197,9 +198,11 @@ capi.client.connect_signal("manage", match_client)
 capi.client.connect_signal("untagged", function (c, t)
     if prop(t,"volatile") == true and #t:clients() == 0 then
         local rules = c_rules.class[string.lower(get_class(c))]
+        c_rules.class[string.lower(get_class(c))] = (prop(t,"onetimer") ~= true or c.class == nil) and rules or nil --Prevent "last resort tags" from persisting
         for j=1,#(rules and rules.tags or {}) do
             rules.tags[j].instances[c.screen] = rules.tags[j].instances[c.screen] ~= t and rules.tags[j].instances[c.screen] or nil
         end
+        awful.tag.history.restore(awful.tag.getscreen(t) or 1) --Explicitly return to the last tag
         awful.tag.delete(t)
     end
 end)

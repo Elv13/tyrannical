@@ -25,15 +25,15 @@ end)
 
 capi.client.disconnect_signal("request::tag", ewmh.tag)
 capi.client.connect_signal("request::tag", function(c)
-    if capi.awesome.startup then
-        --TODO create a tag on that screen
-    else
-        --TODO block invalid requests, let Tyrannical do its job
-        local tags = c:tags()
-        if #tags == 0 then
-            --TODO cannot happen
-        end
-    end
+--     if capi.awesome.startup then
+--         --TODO create a tag on that screen
+--     else
+--         --TODO block invalid requests, let Tyrannical do its job
+--         local tags = c:tags()
+--         if #tags == 0 then
+--             --TODO cannot happen
+--         end
+--     end
 end)
 
 

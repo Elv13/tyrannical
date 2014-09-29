@@ -248,6 +248,7 @@ Then edit this section to fit your needs.
 | **fallback**              | Use this tag for unmatched clients                   | boolean          |
 | **locked**                | Do not add any more clients to this tag              | boolean          |
 | **max_clients**           | Maximum number of clients before creating a new tag  | number or func   |
+| **onetimer**              | Once deleted, this tag cannot be created again       | boolean          |
 
 ★Takes precedence over class
 
@@ -273,6 +274,8 @@ Then edit this section to fit your needs.
 | **master**                | Open a client as master (bigger)               | boolean          |
 | **slave**                 | Open a client as slave (smaller)               | boolean          |
 | **no_autofocus**          | Do not focus a new instance                    | boolean          |
+| **tag**                   | Asign to a pre-existing tag object             | tag/func/array   |
+| **new_tag**               | Do not focus a new instance                    | boolean or array |
 
  *Need default rc.lua modifications in the "client.connect_signal('focus')" section
 
@@ -333,7 +336,7 @@ will allow the client into that tag. This function switch between `tile` and
 `magnifier`:
 
 ```lua
-    local function five_layout(c,tag)
+    local function aero_or_magnifier(c,tag)
         local count = #match:clients() + 1 --The client is not there yet
         if count == 2 then
             awful.layout.set(awful.layout.suit.tile,tag)
@@ -366,6 +369,11 @@ Here are some example:
     
     -- Spawn in the current tag, floating and on top
     awful.util.spawn(terminal,{intrusive=true, floating=true, ontop=true})
+    
+    -- Spawn in an existing tag (assume `my_tag` exist)
+    -- Note that `tag` can also be an array of tags or a function returning
+    -- an array of tags
+    awful.util.spawn(terminal,{tag=my_tag})
 ```
 
 For Awesome 3.5.6+, it is possible to replace the default mod4+r keybinding with
