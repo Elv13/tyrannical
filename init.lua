@@ -12,10 +12,10 @@ require("tyrannical.extra.legacy")
 -------------------------------INIT------------------------------
 
 local signals,module,c_rules,tags_hash,settings,sn_callback,fallbacks,prop = {
-  "exclusive"   , "init"      , "volatile"  , "focus_new" , "instances"        ,
-  "locked"      , "class"     , "instance"  , "spawn"     , "position"         , "force_screen"     ,
-  "max_clients" , "exec_once" , "clone_on"  , "clone_of"  , "no_focus_stealing",
-  "fallback"    , "no_focus_stealing_out"   ,"no_focus_stealing_in"
+  "exclusive"   , "init"      , "volatile"  , "focus_new" , "instances"          ,
+  "locked"      , "class"     , "instance"  , "spawn"     , "position"           ,
+  "max_clients" , "exec_once" , "clone_on"  , "onetimer"  , "no_focus_stealing"  ,
+  "force_screen", "fallback"  , "no_focus_stealing_out"   ,"no_focus_stealing_in",
 },{},{class={},instance={}},{},{},awful.spawn and awful.spawn.snid_buffer or {},{},awful.tag.getproperty
 
 for _,sig in ipairs(signals) do
@@ -90,12 +90,14 @@ function module.focus_client(c,properties)
         end
         capi.client.focus = c
         c:raise()
+        return true
     end
 end
 
 --Apply all properties
 local function apply_properties(c,override,normal)
-    local props,ret = awful.util.table.join(normal,override,override.callback and override.callback(c) or (normal.callback and normal.callback(c)) or {}),nil
+    if not override and not normal then return nil,{} end
+    local props,ret = awful.util.table.join(normal or {},override,override.callback and override.callback(c) or (normal and normal.callback and normal.callback(c)) or {}),nil
     --Set all 'c.something' properties, --TODO maybe eventually move to awful.rules.execute
     for k,_ in pairs(props) do
         if override[k] ~= nil then props[k] = override[k] else props[k] = normal[k] end
@@ -115,7 +117,7 @@ local function apply_properties(c,override,normal)
     end
     --Check if the client should be added to an existing tag (or tags)
     if props.new_tag then
-        ret = c:tags({awful.tag.add(type(props.new_tag)=="table" and props.new_tag.name or c.class,type(props.new_tag)=="table" and props.new_tag or {})})
+        ret = c:tags({awful.tag.add(type(props.new_tag)=="table" and props.new_tag.name or c.class,type(props.new_tag)=="table" and props.new_tag or {screen=c.screen or 1})})
     elseif props.tag then
         ret = c:tags(type(props.tag) == "function" and props.tag(c) or (type(props.tag) == "table" and props.tag or { props.tag }))
     elseif props.intrusive == true or (settings.force_odd_as_intrusive and c.type ~= "normal") then
@@ -135,18 +137,17 @@ local function match_client(c, startup)
 
     local low_i = string.lower(c.instance or "N/A")
     local low_c = string.lower(get_class(c))
-    local tags = props.tags or {props.tag}
+    local tags  = props.tags or {props.tag}
     local rules = c_rules.instance[low_i] or c_rules.class[low_c]
+    local forced_tags,props = apply_properties(c,props,rules and rules.properties)
 
     if #tags == 0 and c.transient_for and settings.group_children == true then
         c.sticky = c.transient_for.sticky or false
         c:tags(c.transient_for:tags())
         return module.focus_client(c,props)
+    elseif forced_tags then
+        return module.focus_client(c,props)
     elseif rules then
-        local ret,props = apply_properties(c,props,rules.properties)
-        if ret then
-            return module.focus_client(c,props)
-        end
         --Add to matches
         local tags_src,fav_scr,c_src,mouse_s = {},false,c.screen,capi.mouse.screen
         for j=1,#(#tags == 0 and rules.tags or {}) do
@@ -202,7 +203,6 @@ capi.client.connect_signal("untagged", function (c, t)
         for j=1,#(rules and rules.tags or {}) do
             rules.tags[j].instances[c.screen] = rules.tags[j].instances[c.screen] ~= t and rules.tags[j].instances[c.screen] or nil
         end
-        awful.tag.history.restore(awful.tag.getscreen(t) or 1) --Explicitly return to the last tag
         awful.tag.delete(t)
     end
 end)
