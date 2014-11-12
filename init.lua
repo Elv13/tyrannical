@@ -3,20 +3,19 @@ local print  , pairs = print  , pairs
 local ipairs , type  = ipairs , type
 local string , unpack= string , unpack
 local awful = require("awful")
-
-local capi = {client = client , tag    = tag   , awesome = awesome,
-              screen = screen , mouse  = mouse                    }
--- Patch Awesome < 3.5.3
 require("tyrannical.extra.legacy")
+
+local capi,sn_callback = {client = client, tag = tag, awesome = awesome,
+    screen = screen, mouse = mouse},awful.spawn and awful.spawn.snid_buffer or {}
 
 -------------------------------INIT------------------------------
 
-local signals,module,c_rules,tags_hash,settings,sn_callback,fallbacks,prop = {
-  "exclusive"   , "init"      , "volatile"  , "focus_new" , "instances"          ,
-  "locked"      , "class"     , "instance"  , "spawn"     , "position"           ,
-  "max_clients" , "exec_once" , "clone_on"  , "onetimer"  , "no_focus_stealing"  ,
-  "force_screen", "fallback"  , "no_focus_stealing_out"   ,"no_focus_stealing_in",
-},{},{class={},instance={}},{},{},awful.spawn and awful.spawn.snid_buffer or {},{},awful.tag.getproperty
+local signals,module,c_rules,tags_hash,settings,fallbacks,prop = {
+  "exclusive"   , "init"      , "volatile"  , "focus_new" , "instances"           ,
+  "locked"      , "class"     , "instance"  , "spawn"     , "position"            ,
+  "max_clients" , "exec_once" , "clone_on"  , "onetimer"  , "no_focus_stealing"   ,
+  "force_screen", "fallback"  , "no_focus_stealing_out"   , "no_focus_stealing_in",
+},{},{class={},instance={}},{},{tag={},client={}},{},awful.tag.getproperty
 
 for _,sig in ipairs(signals) do
     capi.tag.add_signal("property::"..sig)
@@ -97,10 +96,10 @@ end
 --Apply all properties
 local function apply_properties(c,override,normal)
     if not override and not normal then return nil,{} end
-    local props,ret = awful.util.table.join(normal or {},override,override.callback and override.callback(c) or (normal and normal.callback and normal.callback(c)) or {}),nil
+    local props,ret = awful.util.table.join(settings.client,normal or {},override,
+        override.callback and override.callback(c) or (normal and normal.callback and normal.callback(c)) or {}),nil
     --Set all 'c.something' properties, --TODO maybe eventually move to awful.rules.execute
     for k,_ in pairs(props) do
-        if override[k] ~= nil then props[k] = override[k] else props[k] = normal[k] end
         c[k] = props[k]
     end
     --Force floating state, if necessary
@@ -188,7 +187,7 @@ local function match_client(c, startup)
     --Last resort, create a new tag
     c_rules.class[low_c] = c_rules.class[low_c] or {tags={},properties={}}
     local tmp,tag = c_rules.class[low_c],awful.tag.add(get_class(c),{name=get_class(c),onetimer=true,volatile=true,exclusive=true,screen=(c.screen <= capi.screen.count())
-      and c.screen or 1,layout=settings.default_layout or awful.layout.suit.max})
+      and c.screen or 1,layout=settings.tag.layout or settings.default_layout or awful.layout.suit.max})
     tmp.tags[#tmp.tags+1] = {name=get_class(c),instances = setmetatable({[c.screen]=tag}, { __mode = 'v' }),volatile=true,screen=c.screen,exclusive=true}
     c:tags({tag})
     return module.focus_client(c,props)
@@ -227,8 +226,8 @@ end,awful.tag.add
 
 awful.tag.add,awful.tag._setscreen,awful.tag._viewonly = function(tag,props)
     props.screen,props.instances = props.screen or capi.mouse.screen,props.instances or setmetatable({}, { __mode = 'v' })
-    props.mwfact,props.layout = props.mwfact or settings.mwfact,props.layout or settings.default_layout or awful.layout.max
-    local t = awful.tag._add(tag,props)
+    props.mwfact,props.layout = props.mwfact or settings.tag.mwfact or settings.mwfact,props.layout or settings.default_layout or awful.layout.max
+    local t = awful.tag._add(tag,awful.util.table.join(settings.tag,props))
     fallbacks[#fallbacks+1] = props.fallback and t or nil
     t:connect_signal("property::selected", function(t) on_selected_change(t,props or {}) end)
     t.selected = props.selected or false
