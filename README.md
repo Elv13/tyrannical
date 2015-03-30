@@ -302,6 +302,7 @@ be set **before** the tag arrow. Otherwise they wont take effect at startup.
  * [Is it possible to change the layout when adding a new client?](https://github.com/Elv13/tyrannical#is-it-possible-to-change-the-layout-when-adding-a-new-client)
  * [Is it possible to directly launch clients in the current tag or a new one?](https://github.com/Elv13/tyrannical#is-it-possible-to-directly-launch-clients-in-the-current-tag-or-a-new-one)
  * [Can I alter the client properties based on runtime criterias?](https://github.com/Elv13/tyrannical#can-i-alter-the-client-properties-based-on-runtime-criterias)
+ * [Is it possible to match clients based on properties other than class or instance?](https://github.com/Elv13/tyrannical#is-it-possible-to-match-clients-based-on-properties-other-than-class-or-instance)
 
 #### Is it possible to add, remove and move tags?
 
@@ -422,6 +423,25 @@ This function can return an array or properties that will have precedence over
 any properties set by rules. The only limitation of this system is that the
 callback function need to be synchronious. So long bash commands will cause
 Awesome to block until the result is parsed.
+
+#### Is it possible to match clients based on properties other than class or instance?
+
+Yes, but not directly. You need to create a new `awful.rule` that overrides the class property and then match that to your tag:
+
+```lua
+awful.rules.rules = {
+    --default stuff here,
+    {
+        rule = { class = "URxvt", name = "dev"  },
+        callback = function(c)
+        awful.client.property.set(c, "overwrite_class", "urxvt:dev")
+        end
+    }
+}
+```
+This example changes the class of URxvt with name "dev" from "urxvt" to "urxvt:dev" which then can be matched to a tag.
+
+For more information on possible porperties look at [Awful Rules](http://awesome.naquadah.org/wiki/Understanding_Rules) or [API](http://awesome.naquadah.org/doc/api/modules/client.html)
 
 #### What is Tyrannical license?
 
