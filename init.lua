@@ -85,11 +85,35 @@ function module.focus_client(c,properties)
     local properties = properties or (c_rules.instance[string.lower(c.instance or "N/A")] or {}).properties or (c_rules.class[string.lower(get_class(c))] or {}).properties or {}
     if (((not c.transient_for) or (c.transient_for==capi.client.focus) or (not settings.block_children_focus_stealing)) and (not properties.no_autofocus)) then
         if not awful.util.table.hasitem(c:tags(), awful.tag.selected(c.screen or 1)) and (not prop(c:tags()[1],"no_focus_stealing_in")) then
+            -- Reload maximized or fullscreen state
+            module.reload_max_client(c)
+            -- Focus on tag
             awful.tag.viewonly(c:tags()[1])
         end
         capi.client.focus = c
         c:raise()
         return true
+    end
+end
+
+--Check all maximized or fullscreen policies then reload
+function module.reload_max_client(c)
+    if c.maximized then
+        c.maximized = false
+        c.maximized = true
+    else
+        if c.maximized_horizontal then
+            c.maximized_horizontal = false
+            c.maximized_horizontal = true
+        end
+        if c.maximized_vertical then
+            c.maximized_vertical = false
+            c.maximized_vertical = true
+        end
+    end
+    if c.fullscreen then
+        c.fullscreen = false
+        c.fullscreen = true
     end
 end
 
