@@ -198,7 +198,7 @@ capi.client.connect_signal("manage", match_client)
 capi.client.connect_signal("untagged", function (c, t)
     if prop(t,"volatile") == true and #t:clients() == 0 then
         local rules = c_rules.class[string.lower(get_class(c))]
-        c_rules.class[string.lower(get_class(c))] = (prop(t,"onetimer") ~= true or c.class == nil) and rules or nil --Prevent "last resort tags" from persisting
+        c_rules.class[string.lower(get_class(c))] = (prop(t,"onetimer") ~= true or get_class(c) == nil) and rules or nil --Prevent "last resort tags" from persisting
         for j=1,#(rules and rules.tags or {}) do
             rules.tags[j].instances[c.screen] = rules.tags[j].instances[c.screen] ~= t and rules.tags[j].instances[c.screen] or nil
         end
