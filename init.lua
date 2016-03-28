@@ -27,7 +27,7 @@ end
 local function on_selected_change(tag,data)
     if data and data.exec_once and tag.selected then
         for _,v in ipairs(type(data.exec_once) == "string" and {data.exec_once} or data.exec_once) do
-            awful.util.spawn_with_shell("ps -ef | grep -v grep | grep '" .. v .. "' > /dev/null || (" .. v .. ")")
+            awful.spawn.with_shell("ps -ef | grep -v grep | grep '" .. v .. "' > /dev/null || (" .. v .. ")")
         end
     end
 end
@@ -40,16 +40,15 @@ end
 local function load_tags(tyrannical_tags)
     for k,v in ipairs(tyrannical_tags) do
         if v.init ~= false then
-            local stype = type(v.screen)
-            if stype == "table" then
-                local screens = v.screen
+            if type(v.screen) == "table" then
+                local screens = v.screen --TODO remove
                 for k2,v2 in pairs(screens) do
                     if v2 <= capi.screen.count() then
-                        v.screen = v2
-                        awful.tag.add(v.name,v)
+                        v.screen = v2 --TODO remove
+                        awful.tag.add(v.name,v,{screen = v2})
                     end
                 end
-                v.screen = screens
+                v.screen = screens --TODO remove
             elseif (v.screen or 1) <= capi.screen.count() then
                 awful.tag.add(v.name,v)
             end
@@ -58,6 +57,7 @@ local function load_tags(tyrannical_tags)
         end
         for _,prop in ipairs {"class","instance"} do
             if v[prop] and c_rules[prop] then
+--                 for low in (function() local i=0; return function() i=i+1; return prop[i] and prop[i]:lower() end end)() do --TODO fix
                 for i=1,#v[prop] do
                     local low = string.lower(v[prop][i])
                     local tmp = c_rules[prop][low] or {tags={},properties={}}
@@ -72,7 +72,7 @@ end
 
 --Load property
 local function load_property(name,property)
-    for k2,v2 in pairs(property) do
+    for k2,v2 in pairs(property) do --TODO make an iterator?
         local key_type = type(k2)
         local low = string.lower(key_type == "number" and v2 or k2)
         c_rules.class[low] = c_rules.class[low] or {name=low,tags={},properties={}}
@@ -139,10 +139,9 @@ local function match_client(c, startup)
     local tags  = props.tags or {props.tag}
     local rules = c_rules.instance[low_i] or c_rules.class[low_c]
     local forced_tags,props = apply_properties(c,props,rules and rules.properties)
-
-    if #tags == 0 and c.transient_for and settings.group_children == true then
+    if #tags == 0 and c.transient_for and (settings.group_children or (rules and rules.properties.intrusive_popup)) then
         c.sticky = c.transient_for.sticky or false
-        c:tags(c.transient_for:tags())
+        c:tags(awful.util.table.join(c.transient_for:tags(),(rules and rules.properties.intrusive_popup) and awful.tag.selectedlist(c.screen)))
         return module.focus_client(c,props)
     elseif forced_tags then
         return module.focus_client(c,props)
@@ -153,7 +152,7 @@ local function match_client(c, startup)
             local tag,cache = rules.tags[j],rules.tags[j].screen
             tag.instances,has_screen = tag.instances or setmetatable({}, { __mode = 'v' }),(type(tag.screen)=="table" and awful.util.table.hasitem(tag.screen,c_src)~=nil)
             tag.screen = (tag.force_screen ~= true and c_src) or (has_screen and c_src or type(tag.screen)=="table" and tag.screen[1] or tag.screen)
-            tag.screen,match = (tag.screen <= capi.screen.count()) and tag.screen or mouse_s,tag.instances[tag.screen]
+            tag.screen,match = (capi.screen[tag.screen]) and tag.screen or mouse_s,tag.instances[tag.screen]
             local max_clients = match and (type(prop(match,"max_clients")) == "function" and prop(match,"max_clients")(c,match) or prop(match,"max_clients")) or 999
             if (not match and not (fav_scr == true and mouse_s ~= tag.screen)) or (max_clients <= #match:clients()) then
                 awful.tag.setproperty(awful.tag.add(tag.name,tag),"volatile",match and (max_clients ~= nil) or tag.volatile)
@@ -198,11 +197,11 @@ capi.client.connect_signal("manage", match_client)
 capi.client.connect_signal("untagged", function (c, t)
     if prop(t,"volatile") == true and #t:clients() == 0 then
         local rules = c_rules.class[string.lower(get_class(c))]
-        c_rules.class[string.lower(get_class(c))] = (prop(t,"onetimer") ~= true or get_class(c) == nil) and rules or nil --Prevent "last resort tags" from persisting
+        c_rules.class[string.lower(get_class(c))] = (prop(t,"onetimer") ~= true or c.class == nil) and rules or nil --Prevent "last resort tags" from persisting
         for j=1,#(rules and rules.tags or {}) do
             rules.tags[j].instances[c.screen] = rules.tags[j].instances[c.screen] ~= t and rules.tags[j].instances[c.screen] or nil
         end
-        awful.tag.delete(t)
+--         awful.tag.delete(t)
     end
 end)
 
@@ -224,20 +223,20 @@ awful.tag.withcurrent,awful.tag._add  = function(c, startup)
     c:tags(tags)
 end,awful.tag.add
 
-awful.tag.add,awful.tag._setscreen,awful.tag._viewonly = function(tag,props)
+awful.tag.add,awful.tag._viewonly = function(tag,props,override)
     props.screen,props.instances = props.screen or capi.mouse.screen,props.instances or setmetatable({}, { __mode = 'v' })
     props.mwfact,props.layout = props.mwfact or settings.tag.mwfact or settings.mwfact,props.layout or settings.default_layout or awful.layout.max
-    local t = awful.tag._add(tag,awful.util.table.join(settings.tag,props))
+    local t = awful.tag._add(tag,awful.util.table.join(settings.tag,props,override))
     fallbacks[#fallbacks+1] = props.fallback and t or nil
     t:connect_signal("property::selected", function(t) on_selected_change(t,props or {}) end)
     t.selected = props.selected or false
     props.instances[props.screen] = t
     return t
-end,awful.tag.setscreen,awful.tag.viewonly
+end,awful.tag.viewonly
 
 awful.tag.viewonly = function(t)
     if not t then return end
-    if not awful.tag.getscreen(t) then awful.tag.setscreen(capi.mouse.screen) end
+    if not awful.tag.getscreen(t) then awful.tag.setscreen(capi.mouse.screen, t) end
     awful.tag._viewonly(t)
 end
 
