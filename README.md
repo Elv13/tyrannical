@@ -1,6 +1,18 @@
 Tyrannical—A simple tag managment engine for Awesome
 -----------------------------------------------------
 
+### News
+
+Tyrannical 1.0.0 have been released. This is the first and last version for
+Awesome 3.5. Tyrannical is still in active developement and a brand new
+implementation will be released shortly after Awesome 3.6 is released.
+
+Tyrannical goal is and has always been to avoid re-inventing the wheel and
+use existing Awesome APIs to manage tags. This will now get much easier with
+Awesome 3.6 and a new "request" API designed with Tyrannical like workflows
+in mind. This will avoid turning the code into a unreadable ball of spagatti
+as the current implementation became.
+
 ### Description
 Shifty was great and served us well since the early days of the Awesome 3.\*
 series, but just as many aged kid TV stars, it has not grown that well. Many of
