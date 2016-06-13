@@ -188,7 +188,7 @@ local function match_client(c, startup)
     c_rules.class[low_c] = c_rules.class[low_c] or {tags={},properties={}}
     local tmp,tag = c_rules.class[low_c],awful.tag.add(get_class(c),{name=get_class(c),onetimer=true,volatile=true,exclusive=true,screen=(c.screen.index <= capi.screen.count())
       and c.screen or capi.screen.primary or capi.screen[1],layout=settings.tag.layout or settings.default_layout or awful.layout.suit.max})
-    tmp.tags[#tmp.tags+1] = {name=get_class(c),instances = setmetatable({[c.screen]=tag}, { __mode = 'v' }),volatile=true,screen=c.screen,exclusive=true}
+    tmp.tags[#tmp.tags+1] = {name=get_class(c),instances = setmetatable({[get_screen_idx(c.screen)]=tag}, { __mode = 'v' }),volatile=true,screen=c.screen,exclusive=true}
     c:tags({tag})
     return module.focus_client(c,props)
 end
@@ -200,7 +200,7 @@ capi.client.connect_signal("untagged", function (c, t)
         local rules = c_rules.class[string.lower(get_class(c))]
         c_rules.class[string.lower(get_class(c))] = (prop(t,"onetimer") ~= true or c.class == nil) and rules or nil --Prevent "last resort tags" from persisting
         for j=1,#(rules and rules.tags or {}) do
-            rules.tags[j].instances[c.screen] = rules.tags[j].instances[c.screen] ~= t and rules.tags[j].instances[c.screen] or nil
+            rules.tags[j].instances[get_screen_idx(c.screen)] = rules.tags[j].instances[get_screen_idx(c.screen)] ~= t and rules.tags[j].instances[get_screen_idx(c.screen)] or nil
         end
 --         awful.tag.delete(t)
     end
@@ -231,7 +231,7 @@ awful.tag.add = function(tag,props,override)
     fallbacks[#fallbacks+1] = props.fallback and t or nil
     t:connect_signal("property::selected", function(t) on_selected_change(t,props or {}) end)
     t.selected = props.selected or false
-    props.instances[props.screen] = t
+    props.instances[get_screen_idx(props.screen)] = t
     return t
 end
 
