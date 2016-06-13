@@ -2,6 +2,7 @@ local capi      = {root=root,client=client,tag=tag,mouse=mouse}
 local ipairs    = ipairs
 local unpack    = unpack
 local aw_util   = require( "awful.util"   )
+local aw_spawn  = require( "awful.spawn"  )
 local aw_tag    = require( "awful.tag"    )
 local aw_client = require( "awful.client" )
 local aw_layout = require( "awful.layout" )
@@ -9,26 +10,35 @@ local aw_key    = require( "awful.key"    )
 local aw_prompt = require( "awful.prompt" )
 local glib      = require( "lgi"          ).GLib
 
+local function get_current_screen()
+    if capi.client.focus and capi.client.focus.screen == capi.mouse.screen then
+	return capi.mouse.screen
+    elseif (not aw_tag.selected(capi.mouse.screen)) or (#aw_tag.selected(capi.mouse.screen):clients() == 0) or (not capi.client.focus) then
+	return capi.mouse.screen
+    end
+    return capi.client.focus.screen
+end
+
 -- Delete a tag as of 3.5.5, this have a few issue. Patches are on their way
 local function delete_tag()
-    aw_tag.delete(capi.client.focus and aw_tag.selected(capi.client.focus.screen) or aw_tag.selected(capi.mouse.screen) )
+    aw_tag.delete(aw_tag.selected(get_current_screen()) )
 end
 
 -- Create a new tag at the end of the list
 local function new_tag()
-    aw_tag.viewonly(aw_tag.add("NewTag",{screen= (capi.client.focus and capi.client.focus.screen or capi.mouse.screen) }))
+    aw_tag.viewonly(aw_tag.add("NewTag",{screen= get_current_screen() }))
 end
 
 local function new_tag_with_focussed()
     local c = capi.client.focus
-    local t = aw_tag.add(c.class,{screen= (capi.client.focus and capi.client.focus.screen or capi.mouse.screen),layout=aw_layout.suit.tile })
+    local t = aw_tag.add(c.class,{screen= get_current_screen(),layout=aw_layout.suit.tile, volatile=true })
     if c then c:tags(aw_util.table.join(c:tags(), {t})) end
     aw_tag.viewonly(t)
 end
 
 local function move_to_new_tag()
     local c = capi.client.focus
-    local t = aw_tag.add(c.class,{screen= (capi.client.focus and capi.client.focus.screen or capi.mouse.screen) })
+    local t = aw_tag.add(c.class,{screen= get_current_screen() })
     if c then
         c:tags({t})
         aw_tag.viewonly(t)
@@ -60,15 +70,15 @@ local function rename_tag()
 end
 
 local function term_in_current_tag()
-    aw_util.spawn(terminal,{intrusive=true,slave=true})
+    aw_spawn(terminal,{intrusive=true,slave=true})
 end
 
 local function new_tag_with_term()
-    aw_util.spawn(terminal,{new_tag={volatile = true}})
+    aw_spawn(terminal,{new_tag={volatile = true}})
 end
 
 local function fork_tag()
-    local s = capi.client.focus and capi.client.focus.screen or capi.mouse.screen
+    local s = get_current_screen()
     local t = aw_tag.selected(s)
     if not t then return end
     local clients = t:clients()
@@ -80,11 +90,12 @@ end
 local function aero_tag()
     local c = capi.client.focus
     if not c then return end
-    local c2 = aw_client.data.focus[2]
+    local c2 = aw_client.focus.history.list[2]
     if (not c2) or c2 == c then return end
     local t = aw_tag.add("Aero",{screen= c.screen ,layout=aw_layout.suit.tile,mwfact=0.5})
     t:clients({c,c2})
-    aw_tag.viewonly(t)
+
+    t:view_only()
 end
 
 local function register_keys()
