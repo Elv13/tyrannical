@@ -31,6 +31,12 @@ local function get_screen_idx(s)
     return type(s) == "number" and s or s.index
 end
 
+local function scr_exists(s)
+    local t = type(s)
+    return (t == "number" and s > 0 and s < capi.screen.count())
+        or t == "screen" or (t == "table" and s.workarea)
+end
+
 --Load tags, this cannot be undone
 local function load_tags(tyrannical_tags)
     for k,v in ipairs(tyrannical_tags) do
@@ -145,7 +151,8 @@ local function match_client(c, startup)
             tag.screen = tag.screen and get_screen_idx(tag.screen) or nil
             tag.screen = (tag.force_screen ~= true and c_src) or (has_screen and c_src or type(tag.screen)=="table" and tag.screen[1] or tag.screen)
             tag.screen = tag.screen and get_screen_idx(tag.screen) or nil
-            tag.screen,match = (capi.screen[tag.screen]) and tag.screen or mouse_s,tag.instances[get_screen_idx(tag.screen)]
+            tag.screen = scr_exists(tag.screen) and capi.screen[tag.screen] or mouse_s
+            match = tag.instances[get_screen_idx(tag.screen)]
             tag.screen = tag.screen and get_screen_idx(tag.screen) or nil
             local max_clients = match and (type(prop(match,"max_clients")) == "function" and prop(match,"max_clients")(c,match) or prop(match,"max_clients")) or 999
             if (not match and not (fav_scr == true and mouse_s ~= tag.screen)) or (max_clients <= #match:clients()) then
