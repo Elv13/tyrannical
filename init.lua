@@ -10,16 +10,7 @@ local capi,sn_callback = {client = client, tag = tag, awesome = awesome,
 
 -------------------------------INIT------------------------------
 
-local signals,module,c_rules,tags_hash,settings,fallbacks,prop = {
-  "exclusive"   , "init"      , "volatile"  , "focus_new" , "instances"           ,
-  "locked"      , "class"     , "instance"  , "spawn"     , "position"            ,
-  "max_clients" , "exec_once" , "clone_on"  , "onetimer"  , "no_focus_stealing"   ,
-  "force_screen", "fallback"  , "no_focus_stealing_out"   , "no_focus_stealing_in",
-},{},{class={},instance={}},{},{tag={},client={}},{},awful.tag.getproperty
-
-for _,sig in ipairs(signals) do
-    capi.tag.add_signal("property::"..sig)
-end
+local module,c_rules,tags_hash,settings,fallbacks,prop = {},{class={},instance={}},{},{tag={},client={}},{},awful.tag.getproperty
 
 ----------------------TYRANNICAL LOGIC--------------------------
 
