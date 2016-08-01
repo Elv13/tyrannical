@@ -33,7 +33,7 @@ end
 
 local function scr_exists(s)
     local t = type(s)
-    return (t == "number" and s > 0 and s < capi.screen.count())
+    return (t == "number" and s > 0 and s <= capi.screen.count())
         or t == "screen" or (t == "table" and s.workarea)
 end
 
