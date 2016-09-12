@@ -46,12 +46,12 @@ local function load_tags(tyrannical_tags)
                 for k2,v2 in pairs(screens) do
                     if (type(v2) == "number" and v2 or v2.index) <= capi.screen.count() then
                         v.screen = v2 --TODO remove
-                        awful.tag.add(v.name,v,{screen = v2})
+                        awful.tag.add(v.name,v,{screen = v2}).is_template = true
                     end
                 end
                 v.screen = screens --TODO remove
             elseif (v.screen and (type(v.screen) == "number" and v.screen or v.screen.index) or 1) <= capi.screen.count() then
-                awful.tag.add(v.name,v)
+                awful.tag.add(v.name,v).is_template = true
             end
         elseif v.volatile == nil then
             v.volatile = true
@@ -125,6 +125,32 @@ local function apply_properties(c,override,normal)
     return ret,props
 end
 
+local function select_screen(tag)
+    local s
+
+    -- If there is a table of screen, check if it contains the mouse one
+    if type(tag.screen) =="table" and tag.screen[1] then
+        for k, ss in ipairs(tag.screen) do
+            ss = type(ss) == "number" and ss <= capi.screen.count() and ss or nil
+            if ss and capi.screen[ss] == awful.screen.focused() then
+                s = ss
+            end
+        end
+        s = s or capi.screen[tag.screen[1]]
+    else
+        s = scr_exists(tag.screen) and capi.screen[tag.screen] or nil
+    end
+
+    -- If the tag.force_screen is set, then obey
+    if (tag.force_screen and s) or (s and settings.favor_focused == false) then
+        return s
+    end
+
+    -- By default, Tyrannical prefer to use the focused screen to place new tags
+    -- This override some other settings, but is more pleasant to use.
+    return awful.screen.focused()
+end
+
 --Match client
 local function match_client(c, startup)
     if not c then return end
@@ -136,7 +162,7 @@ local function match_client(c, startup)
     local tags  = props.tags or {props.tag}
     local rules = c_rules.instance[low_i] or c_rules.class[low_c]
     local forced_tags,props = apply_properties(c,props,rules and rules.properties)
-    if #tags == 0 and c.transient_for and (settings.group_children or (rules and rules.properties.intrusive_popup)) then
+    if #tags == 0 and c.transient_for and (capi.mouse.screen or (rules and rules.properties.intrusive_popup)) then
         c.sticky = c.transient_for.sticky or false
         c:tags(awful.util.table.join(c.transient_for:tags(),(rules and rules.properties.intrusive_popup) and c.screen.selected_tags))
         return module.focus_client(c,props)
@@ -147,16 +173,17 @@ local function match_client(c, startup)
         local tags_src,fav_scr,c_src,mouse_s = {},false,c.screen,capi.mouse.screen
         for j=1,#(#tags == 0 and rules.tags or {}) do
             local tag,cache = rules.tags[j],rules.tags[j].screen
-            tag.instances,has_screen = tag.instances or setmetatable({}, { __mode = 'v' }),(type(tag.screen)=="table" and awful.util.table.hasitem(tag.screen,c_src)~=nil)
-            tag.screen = tag.screen and get_screen_idx(tag.screen) or nil
-            tag.screen = (tag.force_screen ~= true and c_src) or (has_screen and c_src or type(tag.screen)=="table" and tag.screen[1] or tag.screen)
-            tag.screen = tag.screen and get_screen_idx(tag.screen) or nil
-            tag.screen = scr_exists(tag.screen) and capi.screen[tag.screen] or mouse_s
+            tag.instances = tag.instances or setmetatable({}, { __mode = 'v' })
+
+            tag.screen = select_screen(tag)
+
             match = tag.instances[get_screen_idx(tag.screen)]
             tag.screen = tag.screen and get_screen_idx(tag.screen) or nil
             local max_clients = match and (type(prop(match,"max_clients")) == "function" and prop(match,"max_clients")(c,match) or prop(match,"max_clients")) or 999
             if (not match and not (fav_scr == true and mouse_s ~= tag.screen)) or (max_clients <= #match:clients()) then
-                awful.tag.add(tag.name,tag).volatile = match and (max_clients ~= nil) or tag.volatile
+                local t = awful.tag.add(tag.name,tag)
+                t.volatile = match and (max_clients ~= nil) or tag.volatile
+                t.is_template = true
             end
             tags_src[tag.screen],fav_scr = tags_src[tag.screen] or {},fav_scr or (tag.screen == mouse_s) --Reset if a better screen is found
             tags_src[tag.screen][#tags_src[get_screen_idx(tag.screen)]+1] = tag.instances[get_screen_idx(tag.screen)]
@@ -171,12 +198,14 @@ local function match_client(c, startup)
             return module.focus_client(c,props)
         end
     end
+
     --Add to the current tag if not exclusive
     local cur_tag = c.screen.selected_tag
-    if cur_tag and prop(cur_tag,"exclusive") ~= true and prop(cur_tag,"locked") ~= true then
+    if cur_tag and cur_tag.exclusive ~= true and cur_tag.locked ~= true then
         c:tags({cur_tag})
         return module.focus_client(c,props)
     end
+
     --Add to the fallback tags
     if #c:tags((function(arr) for k,v in ipairs(fallbacks) do
                                   arr[#arr+1]=v.screen == c.screen and v or nil
@@ -193,7 +222,7 @@ local function match_client(c, startup)
     return module.focus_client(c,props)
 end
 
-capi.client.connect_signal("manage", match_client)
+capi.client.connect_signal("request::tag", match_client)
 
 capi.client.connect_signal("untagged", function (c, t)
     if prop(t,"volatile") == true and #t:clients() == 0 then
@@ -237,6 +266,83 @@ end
 
 capi.tag.connect_signal("property::fallback",function(t)
     fallbacks[awful.util.table.hasitem(fallbacks, t) or (#fallbacks+1)] = prop(t,"fallback") and t or nil
+end)
+
+local is_init = setmetatable({}, { __mode = 'k' })
+
+local function contain_screen(tab, s)
+    for _, v in ipairs(tab) do
+        if type(v) ~= "number" or v <= capi.screen.count() then
+            v = capi.screen[v]
+            if v == s then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+-- Add init tags to newly connected screens
+awful.screen.connect_for_each_screen(function(s) --TODO remove the load code and use this
+    if is_init[s] then return end
+
+    for _, def in pairs(tags_hash) do
+        if def.init then
+            if def.screen and (type(def.screen) == "table" and contain_screen(def.screen, s))
+              or (type(def.screen) == "number" and def.screen <= capi.screen.count())
+              or (type(def.screen) == "screen") then
+                local real_s = def.screen
+                def.screen = s
+                awful.tag.add(def.name,def).is_template = true
+                def.screen = real_s
+            end
+        end
+    end
+
+    -- Restore old tags to their original screen
+    for ss in capi.screen do
+        for _, t in ipairs(ss.tags) do
+            if t.saved_from == s.index then
+                t.screen = s
+            end
+        end
+    end
+end)
+
+-- Handle events such as screen being removed
+capi.tag.connect_signal("request::screen", function(t)
+    -- Only salvage used tags
+    if #t:clients() > 0 then
+        -- If the same class of tag exist on another screen, use that
+        if t.is_template and t.instances then
+            local new_tag
+            for k, t in pairs(t.instances) do
+                if k ~= t.screen.index and k <= capi.screen.count() then
+                    new_tag = capi.screen[k]
+                    break
+                end
+            end
+
+            if new_tag then
+                for _, c in ipairs(t:clients()) do
+                    c:tags{new_tag}--TODO batch this to if a client is on 2 tags, it doesn't get removed from the other
+                end
+
+                -- The tag will be deleted by awful.tag
+                return
+            end
+        end
+
+        local new_screen = capi.screen.primary or awful.screen.focused() --TODO be smarter
+
+        -- In case the screen comes back, save the old index
+        t.saved_from = t.screen.index
+
+        -- Move the tag to an existing screen
+        t.selected = false
+        t.screen = new_screen
+    end
 end)
 
 --------------------------OBJECT GEARS---------------------------
