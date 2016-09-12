@@ -299,10 +299,15 @@ Then edit this section to fit your needs.
 | **mwfact**                             | The default master/slave ratio                      | float (0-1)      |
 | **force_odd_as_intrusive**             | Make all non-normal (dock, splash) intrusive        | boolean          |
 | **no_focus_stealing_out**              | Do not unselect tags when a new client is added     | boolean          |
+| **favor_focused**                      | Prefer the focused screen to the screen property    | boolean          |
 
 
 It's worth noting that some settings like `mwfact` and `default_layout` should
 be set **before** the tag arrow. Otherwise they wont take effect at startup.
+
+**favor_focused** Is enabled by default for tags created after startup for
+convinience. Use *force_screen* or `tyrannical.settings.favor_focused = false`
+to do otherwise.
 
 -----------------------------------------------------
 
