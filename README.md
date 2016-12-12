@@ -2,15 +2,49 @@ Tyrannical—A simple tag managment engine for Awesome
 -----------------------------------------------------
 
 ### Description
-Shifty was great and served us well since the early days of the Awesome 3.\*
-series, but just as many aged kid TV stars, it has not grown that well. Many of
-its once unique features are now supported by the default ```awful.tag```
-engine, adding legacy complexity to the code base and affecting performance.
 
-This is why Tyrannical was created. It is a light rule engine offering pretty
-much the same rule configuration, but without all the dynamic tag code. Note
-that dynamic tagging is now supported directly by awesome. Tyrannical support
-Awesome WM version 3.5 and higher.
+Tyrannical is a tag management system for Awesome 3.5+. It is inspired and
+intend to replace the Shifty module popular in older versions of Awesome.
+
+Compared to Shifty, Tyrannical doesn't try to replace `awful.tag` and
+`awful.rules`, but rather extend them to support the following features:
+
+ * Declarative tags declaration description
+ * Rules based around the tags rather than the clients
+ * Rules based around the client properties rather than the clients
+ * A dynamic tag workflow where tags are created and removed on demand
+ * A stateful tag model
+ * More powerful focus stealing rules
+
+Tyrannical was created because:
+
+ * Shifty code is too complex and outdated to be maintained
+ * `awful` support dynamic tagging, but it's awkward to use
+ * It implements a workflow that better fit my taste than the default one
+
+Tyrannical 1.0 versus 2.0-alpha:
+
+While I am among the first AwesomeWM user, I only became a major contributor
+during the 4.0 development cycle. The new version of Awesome has new APIs
+designed to improve alternate workflows such as the one proposed by Tyrannical.
+
+The new version aim to rewrite Tyrannical to use these APIs instead of the
+hacks that allowed the original version to work. The original code also became
+maintainable due to horrible coding practices and repeated hacks to fine tune
+its behavior.
+
+Finally, Awesome 4.0 introduces support for adding and removing screen at
+runtime. Therefor, being able to expand and contract the tag set dynamically
+is finally possible. Being able to support the use case where a laptop is
+optionally plugged to an external monitor will be implemented once feature
+parity has been achieved.
+
+Future:
+
+My first attempt at implementing dynamic layouts failed back in 2012, but for a
+year I have been using a new implementation. This isn't expected to land in
+Awesome anytime soon. But once it does, Tyrannical will gain the ability to
+describe whole dynamic layouts instead of "just" its tag.
 
 #### Tag model
 
@@ -79,7 +113,7 @@ launched. This is useful for download managers or background terminals tasks.
 
 ### Installation
 
-This is how to install Tyrannical
+This is how to install Tyrannical for Awesome 4.X:
 
 ```
     mkdir -p ~/.config/awesome
@@ -87,21 +121,9 @@ This is how to install Tyrannical
     git clone https://github.com/Elv13/tyrannical.git
 ```
 
+Awesome 3.5 users should fetch the version 1.0.0.
+
 Then either use the sample rc.lua or upgrade your existing one.
-
-### Examples
-
-Install [Xephyr](http://www.freedesktop.org/wiki/Software/Xephyr) and run the
-following script
-
-```
- sh utils/xephyr.sh start
-```
-
-*Note:* The tyrannical repository must be named awesome-tyrannical for the
-script to work out of the box.
-
-Also see ```samples.rc.lua``` for a sample.
 
 ### Configuration
 
@@ -113,24 +135,20 @@ make dynamic (and static, as a side effect) tagging configuration easier. This
 module doesn't require any major initialisation. Compared to shifty, it is much
 more transparent.
 
-The first modification is to include the module at the top of your ```rc.lua``` (after ```awful.rules = require("awful.rules")```):
+The first modification is to include the module at the top of your `rc.lua`
+(after `awful.rules = require("awful.rules")`):
+
 ```lua
 local tyrannical = require("tyrannical")
 ```
 
-Then this section have to be replaced:
+Then this line have to be removed:
+
 ```lua
--- {{{ Tags
--- Define a tag table which hold all screen tags.
-tags = {}
-for s = 1, screen.count() do
-    -- Each screen has its own tag table.
-    tags[s] = awful.tag({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }, s, layouts[1])
-end
--- }}}
+    awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
 ```
 
-by:
+And this added **outside** of the `awful.screen.connect_for_each_screen` section:
 
 ```lua
 tyrannical.tags = {
@@ -157,7 +175,7 @@ tyrannical.tags = {
             "Chromium"      , "nightly"        , "minefield"     }
     } ,
     {
-        name = "Files",
+        name        = "Files",
         init        = true,
         exclusive   = true,
         screen      = 1,
@@ -168,7 +186,7 @@ tyrannical.tags = {
         }
     } ,
     {
-        name = "Develop",
+        name        = "Develop",
         init        = true,
         exclusive   = true,
         screen      = 1,
@@ -210,8 +228,8 @@ tyrannical.properties.ontop = {
 }
 
 -- Force the matching clients (by classes) to be centered on the screen on init
-tyrannical.properties.centered = {
-    "kcalc"
+tyrannical.properties.placement = {
+    kcalc = awful.placement.centered
 }
 
 tyrannical.settings.block_children_focus_stealing = true --Block popups ()
@@ -219,7 +237,7 @@ tyrannical.settings.group_children = true --Force popups/dialogs to have the sam
 
 ```
 
-Then edit this section to fit your needs. 
+Then edit this section to fit your needs.
 
 ##### The available tag properties are:
 
@@ -249,7 +267,14 @@ Then edit this section to fit your needs.
 
 ★Takes precedence over class
 
+See: http://new.awesomewm.org/apidoc/classes/tag.html
+
 ##### The available client properties are:
+
+Note that every property can also be a function. In that case it has a client
+as the first parameter and the property array as the second. It must return a
+value with a compatible type. Those properties are directly converted into
+`awful.rules`.
 
 | Property                  | Description                                    | Type             |
 | ------------------------- | ---------------------------------------------- |:----------------:|
@@ -257,7 +282,7 @@ Then edit this section to fit your needs.
 | **below**                 | Display below other clients                    | boolean          |
 | **border_color**          | Change client default border color*            | string           |
 | **border_width**          | Change the client border width                 | number           |
-| **centered**              | Center the client on the screen at launch      | boolean          |
+| **placement**             | Center the client on the screen at launch      | awful.placement  |
 | **floating**              | Make the client floating or insert into layout | boolean          |
 | **focusable**             | Allow focus                                    | boolean          |
 | **fullscreen**            | Cover the whole screen                         | boolean          |
@@ -271,11 +296,17 @@ Then edit this section to fit your needs.
 | **master**                | Open a client as master (bigger)               | boolean          |
 | **slave**                 | Open a client as slave (smaller)               | boolean          |
 | **no_autofocus**          | Do not focus a new instance                    | boolean          |
-| **tag**                   | Asign to a pre-existing tag object             | tag/func/array   |
+| **tag**                   | Asign to a pre-existing tag object             | tag/array/string |
+| **tags**                  | Asign to a pre-existing tag object             | array            |
 | **new_tag**               | Do not focus a new instance                    | boolean or array |
 | **callback**              | A function returning an array or properties    | function         |
 
  *Need default rc.lua modifications in the "client.connect_signal('focus')" section
+
+See:
+
+ * http://new.awesomewm.org/apidoc/classes/client.html
+ * http://new.awesomewm.org/apidoc/libraries/awful.rules.html
 
 ##### The available global settings are:
 
