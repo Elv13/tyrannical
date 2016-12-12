@@ -120,11 +120,14 @@ local function apply_properties(c, props, callbacks)
     end
 
     local has_tag = props.tag or props.new_tag or props.tags
-
     --Check if the client should be added to an existing tag (or tags)
     if (not has_tag) and is_intrusive then
-        local tag = c.screen.selected_tag
-            or c.screen.tags[1]:view_only()
+        local tag = capi.mouse.screen.selected_tag
+            or capi.mouse.screen.tags[1]
+
+        if tag and not tag.selected then
+            tag:view_only()
+        end
 
         if tag then --Can be false if there is no tags
             props.tag, props.tags, props.intrusive = tag, nil, false
@@ -167,7 +170,6 @@ end
 
 --Match client
 local function match_client(c, forced_tags, hints)
-
     -- Don't prevent tags from being drag and dropped between screens
     if hints and hints.reason == "screen" then
         c:tags {c.screen.selected_tag}
