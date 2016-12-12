@@ -167,6 +167,13 @@ end
 
 --Match client
 local function match_client(c, forced_tags, hints)
+
+    -- Don't prevent tags from being drag and dropped between screens
+    if hints and hints.reason == "screen" then
+        c:tags {c.screen.selected_tag}
+        return true
+    end
+
     if (not c) or #c:tags() > 0 then return end
 
     local props = c.startup_id and sn_callback[tostring(c.startup_id)] or {}
