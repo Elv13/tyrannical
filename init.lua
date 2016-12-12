@@ -80,12 +80,22 @@ local function load_property(name,property)
     end
 end
 
+local function has_selected(tags, screen)
+    if #tags == 0 then return false end
+
+    for _, t in ipairs(screen.selected_tags) do
+        if awful.util.table.hasitem(tags, t) then return true end
+    end
+
+    return false
+end
+
 function module.focus_client(c,properties)
 
     if (((not c.transient_for) or (c.transient_for==capi.client.focus) or (not settings.block_children_focus_stealing)) and (not c.no_autofocus)) then
         local tags = c:tags()
 
-        if #tags > 0 and not c:isvisible() and not tags[1].no_focus_stealing_in then
+        if #tags > 0 and not has_selected(tags, c.screen) and not tags[1].no_focus_stealing_in then
             c:tags()[1]:view_only()
         end
 
@@ -105,14 +115,19 @@ local function apply_properties(c, props, callbacks)
         or type(props.intrusive) == "function" and props.intrusive(c)
         or props.intrusive
 
+    if props.tag or props.tags or props.new_tag then
+        is_intrusive = false
+    end
+
+    local has_tag = props.tag or props.new_tag or props.tags
+
     --Check if the client should be added to an existing tag (or tags)
-    if (not props.new_tag) and is_intrusive then
+    if (not has_tag) and is_intrusive then
         local tag = c.screen.selected_tag
             or c.screen.tags[1]:view_only()
-            or c.screen.selected_tag
 
         if tag then --Can be false if there is no tags
-            props.tag, props.tags = tag, nil
+            props.tag, props.tags, props.intrusive = tag, nil, false
         end
     end
 
@@ -359,7 +374,7 @@ function awful.rules.apply(c)
 
         -- The SNID tag(s) always have precedence over the rules one(s)
         if snprops.tag or snprops.tags or snprops.new_tag then
-            props.tag, props.tags, props.new_tag, props.intrusive = nil, nil, nil, nil
+            props.tag, props.tags, props.new_tag, props.intrusive = nil, nil, nil, false
         end
 
         awful.util.table.crush(props,snprops)
