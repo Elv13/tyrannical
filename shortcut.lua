@@ -26,7 +26,7 @@ end
 
 -- Create a new tag at the end of the list
 local function new_tag()
-    aw_tag.viewonly(aw_tag.add("NewTag",{screen= get_current_screen() }))
+    aw_tag.add("NewTag",{screen= get_current_screen() }):view_only()
 end
 
 local function new_tag_with_focussed()
@@ -70,7 +70,7 @@ local function rename_tag()
 end
 
 local function term_in_current_tag()
-    aw_spawn(terminal,{intrusive=true,slave=true,screen=get_current_screen()})
+    aw_spawn(terminal,{tag=get_current_screen().selected_tag,slave=true,screen=get_current_screen()})
 end
 
 local function new_tag_with_term()
