@@ -90,6 +90,18 @@ local function has_selected(tags, screen)
     return false
 end
 
+function awful.rules.delayed_properties.master(c, value)
+    if not value then return end
+
+    awful.client.setmaster(c)
+end
+
+function awful.rules.delayed_properties.slave(c, value)
+    if not value then return end
+
+    awful.client.setslave(c)
+end
+
 function module.focus_client(c,properties)
 
     if (((not c.transient_for) or (c.transient_for==capi.client.focus) or (not settings.block_children_focus_stealing)) and (not c.no_autofocus)) then
@@ -135,11 +147,6 @@ local function apply_properties(c, props, callbacks)
     end
 
     awful.rules.execute(c, props, callbacks)
-
-    --Set slave or master
-    if props.slave == true or props.master == true then
-        awful.client["set"..(props.slave and "slave" or "master")](c, true)
-    end
 end
 
 local function select_screen(tag)
