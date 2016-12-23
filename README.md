@@ -152,6 +152,7 @@ The first modification is to include the module at the top of your `rc.lua`
 
 ```lua
 local tyrannical = require("tyrannical")
+--require("tyrannical.shortcut") --optional
 ```
 
 Then this line have to be removed:
