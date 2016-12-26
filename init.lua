@@ -5,11 +5,11 @@ local string , unpack= string , unpack or table.unpack
 local awful = require("awful")
 
 local capi,sn_callback = {client = client, tag = tag, awesome = awesome,
-    screen = screen, mouse = mouse},awful.spawn and awful.spawn.snid_buffer or {}
+    screen = screen, mouse = mouse}, awful.spawn.snid_buffer or {}
 
 -------------------------------INIT------------------------------
 
-local module,c_rules,tags_hash,settings,fallbacks,prop = {},{class={},instance={}},{},{tag={},client={}},{},awful.tag.getproperty
+local module,c_rules,tags_hash,settings,fallbacks = {},{class={},instance={}},{},{tag={},client={}},{}
 
 ----------------------TYRANNICAL LOGIC--------------------------
 
@@ -210,7 +210,7 @@ local function match_client(c, forced_tags, hints)
 
             match = tag.instances[get_screen_idx(tag.screen)]
             tag.screen = tag.screen and get_screen_idx(tag.screen) or nil
-            local max_clients = match and (type(prop(match,"max_clients")) == "function" and prop(match,"max_clients")(c,match) or prop(match,"max_clients")) or 999
+            local max_clients = match and (type(match.max_clients) == "function" and match.max_clients(c,match) or match.max_clients) or 999
             if (not match and not (fav_scr == true and mouse_s ~= tag.screen)) or (max_clients <= #match:clients()) then
                 local t = awful.tag.add(tag.name,tag)
                 t.volatile = match and (max_clients ~= nil) or tag.volatile
@@ -221,7 +221,7 @@ local function match_client(c, forced_tags, hints)
             tag.screen = cache
         end
         for k,t in ipairs(tags_src[mouse_s] or tags_src[c_src] or select(2,next(tags_src)) or awful.util.table.join(unpack(tags_src))) do
-            tags[#tags+1] = prop(t,"locked") ~= true and t.activated and t or nil --Do not add to locked tags
+            tags[#tags+1] = t.locked ~= true and t.activated and t or nil --Do not add to locked tags
         end
         c.screen = tags[1] and tags[1].screen or c_src
         if #tags > 0 then
@@ -257,9 +257,9 @@ capi.client.disconnect_signal("request::tag", awful.ewmh.tag)
 capi.client.connect_signal("request::tag", match_client)
 
 capi.client.connect_signal("untagged", function (c, t)
-    if prop(t,"volatile") == true and #t:clients() == 0 then
+    if t.volatile == true and #t:clients() == 0 then
         local rules = c_rules.class[string.lower(get_class(c))]
-        c_rules.class[string.lower(get_class(c))] = (prop(t,"onetimer") ~= true or c.class == nil) and rules or nil --Prevent "last resort tags" from persisting
+        c_rules.class[string.lower(get_class(c))] = (t.onetimer ~= true or c.class == nil) and rules or nil --Prevent "last resort tags" from persisting
         for j=1,#(rules and rules.tags or {}) do
             rules.tags[j].instances[get_screen_idx(c.screen)] = rules.tags[j].instances[get_screen_idx(c.screen)] ~= t and rules.tags[j].instances[get_screen_idx(c.screen)] or nil
         end
