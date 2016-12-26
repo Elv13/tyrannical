@@ -3,6 +3,13 @@ Tyrannical—A simple tag managment engine for Awesome
 
 ### News
 
+#### December 2016
+
+The master branch **is not for Awesome 4.0+**. If you use **Awesome 3.5,**
+**use the 1.0.0 version**
+
+#### April 2016
+
 Tyrannical 1.0.0 have been released. This is the first and last version for
 Awesome 3.5. Tyrannical is still in active developement and a brand new
 implementation will be released shortly after Awesome 3.6 is released.
