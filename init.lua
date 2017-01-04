@@ -94,12 +94,18 @@ function awful.rules.delayed_properties.master(c, value)
     if not value then return end
 
     awful.client.setmaster(c)
+
+    -- Some smarter layouts may implement this directly
+    c.master = true
 end
 
 function awful.rules.delayed_properties.slave(c, value)
     if not value then return end
 
     awful.client.setslave(c)
+
+    -- Some smarter layouts may implement this directly
+    c.slave = true
 end
 
 function module.focus_client(c,properties)
