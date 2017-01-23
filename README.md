@@ -5,7 +5,7 @@ Tyrannical—A simple tag managment engine for Awesome
 
 #### December 2016
 
-The master branch **is not for Awesome 4.0+**. If you use **Awesome 3.5,**
+The master branch **is for Awesome 4.0+**. If you use **Awesome 3.5,**
 **use the 1.0.0 version**
 
 #### April 2016
