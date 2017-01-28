@@ -374,17 +374,7 @@ capi.client.disconnect_signal("manage",awful.spawn.on_snid_callback)
 
 --- Replace the default handler to take into account Tyrannical properties
 function awful.rules.apply(c)
-    local low_i = string.lower(c.instance or "N/A")
-    local low_c = string.lower(get_class(c))
-
     local callbacks, props = {}, {}
-
-    local props_src = (c_rules.instance[low_i]
-        or c_rules.class[low_c] or {}).properties
-        or {}
-
-    -- Add Tyrannical properties
-    awful.util.table.crush(props,props_src)
 
     -- Add the rules properties
     for _, entry in ipairs(awful.rules.matching_rules(c, awful.rules.rules)) do
@@ -394,6 +384,17 @@ function awful.rules.apply(c)
             table.insert(callbacks, entry.callback)
         end
     end
+
+    -- In case the class is overwriten
+    local low_c = props.overwrite_class or string.lower(get_class(c))
+    local low_i = string.lower(c.instance or "N/A")
+
+    -- Add Tyrannical properties
+    local props_src = (c_rules.instance[low_i]
+        or c_rules.class[low_c] or {}).properties
+        or {}
+
+    awful.util.table.crush(props,props_src)
 
     -- Add startup_id overridden properties
     if c.startup_id and awful.spawn.snid_buffer[c.startup_id] then
