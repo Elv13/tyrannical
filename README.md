@@ -10,7 +10,7 @@ The master branch **is for Awesome 4.0+**. If you use **Awesome 3.5,**
 
 #### April 2016
 
-Tyrannical 1.0.0 have been released. This is the first and last version for
+Tyrannical 1.0.0 has been released. This is the first and last version for
 Awesome 3.5. Tyrannical is still in active developement and a brand new
 implementation will be released shortly after Awesome 3.6 is released.
 
@@ -105,7 +105,7 @@ can also to other value by using the class name as table key:
 Tyrannical focus model is very fine tuned. It is possible to add rules on how
 the focus will be attributes to clients and tags.
 
-**block_children_focus_stealing:** 
+**block_children_focus_stealing:**
 This is a fancy X11 name for something very common: modal dialogs and popups.
 If this is set to `true`, then a dialog wont be able to steal the focus from
 whatever your doing. This is useful for some misbehaving apps such as Firefox
@@ -211,7 +211,7 @@ tyrannical.tags = {
         exclusive   = true,
         screen      = 1,
         layout      = awful.layout.suit.max                          ,
-        class ={ 
+        class ={
             "Kate", "KDevelop", "Codeblocks", "Code::Blocks" , "DDD", "kate4"}
     } ,
     {
@@ -239,7 +239,7 @@ tyrannical.properties.floating = {
     "MPlayer"      , "pinentry"        , "ksnapshot"  , "pinentry"     , "gtksu"          ,
     "xine"         , "feh"             , "kmix"       , "kcalc"        , "xcalc"          ,
     "yakuake"      , "Select Color$"   , "kruler"     , "kcolorchooser", "Paste Special"  ,
-    "New Form"     , "Insert Picture"  , "kcharselect", "mythfrontend" , "plasmoidviewer" 
+    "New Form"     , "Insert Picture"  , "kcharselect", "mythfrontend" , "plasmoidviewer"
 }
 
 -- Make the matching clients (by classes) on top of the default layout
@@ -422,16 +422,16 @@ Here are some example:
 ```lua
     -- Spawn in a new tag
     awful.util.spawn("urxvt",{new_tag=true})
-    
+
     -- Or for more advanced use case, you can use a full tag definition too
     awful.util.spawn("urxvt",{ new_tag= {
        name = "MyNewTag",
        exclusive = true,
     })
-    
+
     -- Spawn in the current tag, floating and on top
     awful.util.spawn(terminal,{intrusive=true, floating=true, ontop=true})
-    
+
     -- Spawn in an existing tag (assume `my_tag` exist)
     -- Note that `tag` can also be an array of tags or a function returning
     -- an array of tags
@@ -497,7 +497,7 @@ awful.rules.rules = {
 ```
 This example changes the class of URxvt with name "dev" from "urxvt" to "urxvt:dev" which then can be matched to a tag.
 
-For more information on possible porperties look at [Awful Rules](http://awesome.naquadah.org/wiki/Understanding_Rules) or [API](http://awesome.naquadah.org/doc/api/modules/client.html)
+For more information on possible properties look at [Awful Rules](http://awesome.naquadah.org/wiki/Understanding_Rules) or [API](http://awesome.naquadah.org/doc/api/modules/client.html)
 
 #### What is Tyrannical license?
 
