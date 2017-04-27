@@ -273,8 +273,8 @@ Then edit this section to fit your needs.
 | **init**                  | Create when awesome launch                           | boolean          |
 | **layout**                | The tag layout                                       | layout           |
 | **mwfact**                | Tiled layout master/slave ratio                      | float(0-1)       |
-| **ncol**                  | Number of columns                                    | number           |
-| **nmaster**               | Number of master clients                             | number           |
+| **column_count**          | Number of columns                                    | number           |
+| **master_count**          | Number of master clients                             | number           |
 | **no_focus_stealing_in**  | Do not select this tag when a new client is added    | boolean          |
 | **no_focus_stealing_out** | Do not unselect when a new client is added elsewhere | boolean          |
 | **screen**                | Tag screen(s)                                        | number or array  |
