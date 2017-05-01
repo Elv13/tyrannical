@@ -272,7 +272,7 @@ Then edit this section to fit your needs.
 | **icon**                  | Tag icon                                             | path             |
 | **init**                  | Create when awesome launch                           | boolean          |
 | **layout**                | The tag layout                                       | layout           |
-| **mwfact**                | Tiled layout master/slave ratio                      | float(0-1)       |
+| **master_width_factor**   | Tiled layout master/slave ratio                      | float(0-1)       |
 | **column_count**          | Number of columns                                    | number           |
 | **master_count**          | Number of master clients                             | number           |
 | **no_focus_stealing_in**  | Do not select this tag when a new client is added    | boolean          |
@@ -335,13 +335,13 @@ See:
 | **block_children_focus_stealing**      | Prevent popups from stealing focus                  | boolean          |
 | **default_layout**                     | The default layout for tags                         | layout           |
 | **group_children**                     | Add dialogs to the same tags as their parent client | boolean          |
-| **mwfact**                             | The default master/slave ratio                      | float (0-1)      |
+| **master_width_factor**                | The default master/slave ratio                      | float (0-1)      |
 | **force_odd_as_intrusive**             | Make all non-normal (dock, splash) intrusive        | boolean          |
 | **no_focus_stealing_out**              | Do not unselect tags when a new client is added     | boolean          |
 | **favor_focused**                      | Prefer the focused screen to the screen property    | boolean          |
 
 
-It's worth noting that some settings like `mwfact` and `default_layout` should
+It's worth noting that some settings like `master_width_factor` and `default_layout` should
 be set **before** the tag arrow. Otherwise they wont take effect at startup.
 
 **favor_focused** Is enabled by default for tags created after startup for
@@ -402,7 +402,7 @@ will allow the client into that tag. This function switch between `tile` and
         local count = #match:clients() + 1 --The client is not there yet
         if count == 2 then
             awful.layout.set(awful.layout.suit.tile,tag)
-            awful.tag.setproperty(tag,"mwfact",0.5)
+            awful.tag.setproperty(tag,"master_width_factor",0.5)
         else
             awful.layout.set(awful.layout.suit.magnifier,tag)
         end

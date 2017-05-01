@@ -124,7 +124,7 @@ local function aero_tag()
     local t = aw_tag.add("Aero", {
         screen = c.screen,
         layout = aw_layout.suit.tile,
-        mwfact = 0.5
+        master_width_factor = 0.5
     })
 
     t:clients({c,c2})

@@ -277,7 +277,7 @@ awful.tag._add = awful.tag.add
 
 awful.tag.add = function(tag,props,override)
     props.screen,props.instances = props.screen or capi.mouse.screen,props.instances or setmetatable({}, { __mode = 'v' })
-    props.mwfact,props.layout = props.mwfact or settings.tag.mwfact or settings.mwfact,props.layout or settings.default_layout or awful.layout.max
+    props.master_width_factor,props.layout = props.master_width_factor or settings.tag.master_width_factor or settings.master_width_factor,props.layout or settings.default_layout or awful.layout.max
     local t = awful.tag._add(tag,awful.util.table.join(settings.tag,props,override))
     fallbacks[#fallbacks+1] = props.fallback and t or nil
     t:connect_signal("property::selected", function(t) on_selected_change(t,props or {}) end)
