@@ -421,21 +421,21 @@ Here are some example:
 
 ```lua
 -- Spawn in a new tag
-awful.util.spawn("urxvt",{new_tag=true})
+awful.spawn("urxvt",{new_tag=true})
 
 -- Or for more advanced use case, you can use a full tag definition too
-awful.util.spawn("urxvt",{ new_tag= {
+awful.spawn("urxvt",{ new_tag= {
    name = "MyNewTag",
    exclusive = true,
 })
 
 -- Spawn in the current tag, floating and on top
-awful.util.spawn(terminal,{intrusive=true, floating=true, ontop=true})
+awful.spawn(terminal,{intrusive=true, floating=true, ontop=true})
 
 -- Spawn in an existing tag (assume `my_tag` exist)
 -- Note that `tag` can also be an array of tags or a function returning
 -- an array of tags
-awful.util.spawn(terminal,{tag=my_tag})
+awful.spawn(terminal,{tag=my_tag})
 ```
 
 For Awesome 3.5.6+, it is possible to replace the default mod4+r keybinding with
@@ -446,17 +446,17 @@ awful.key({ modkey }, "r",
     function ()
         awful.prompt.run({ prompt = "Run: ", hooks = {
             {{         },"Return",function(command)
-                local result = awful.util.spawn(command)
+                local result = awful.spawn(command)
                 mypromptbox[mouse.screen].widget:set_text(type(result) == "string" and result or "")
                 return true
             end},
             {{"Mod1"   },"Return",function(command)
-                local result = awful.util.spawn(command,{intrusive=true})
+                local result = awful.spawn(command,{intrusive=true})
                 mypromptbox[mouse.screen].widget:set_text(type(result) == "string" and result or "")
                 return true
             end},
             {{"Shift"  },"Return",function(command)
-                local result = awful.util.spawn(command,{intrusive=true,ontop=true,floating=true})
+                local result = awful.spawn(command,{intrusive=true,ontop=true,floating=true})
                 mypromptbox[mouse.screen].widget:set_text(type(result) == "string" and result or "")
                 return true
             end}
