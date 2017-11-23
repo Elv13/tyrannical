@@ -95,9 +95,9 @@ properties from the table name. For example, if you add Firefox to
 can also to other value by using the class name as table key:
 
 ```lua
-    tyrannical.properties.maximized = {
-        amarok = false,
-    }
+tyrannical.properties.maximized = {
+    amarok = false,
+}
 ```
 
 #### Focus model
@@ -135,9 +135,9 @@ launched. This is useful for download managers or background terminals tasks.
 This is how to install Tyrannical for Awesome 4.X:
 
 ```
-    mkdir -p ~/.config/awesome
-    cd ~/.config/awesome
-    git clone https://github.com/Elv13/tyrannical.git
+mkdir -p ~/.config/awesome
+cd ~/.config/awesome
+git clone https://github.com/Elv13/tyrannical.git
 ```
 
 Awesome 3.5 users should fetch the version 1.0.0.
@@ -162,10 +162,10 @@ local tyrannical = require("tyrannical")
 --require("tyrannical.shortcut") --optional
 ```
 
-Then this line have to be removed:
+Then this line has to be removed:
 
 ```lua
-    awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
+awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
 ```
 
 And this added **outside** of the `awful.screen.connect_for_each_screen` section:
@@ -379,13 +379,13 @@ Tyrannical shares awful's tag list. It does not keep its own indexes since this
 would make it harder to implement this feature in the core. Given that, this
 feature is outside the project scope. That being said, nothing prevents you
 from adding a "position" property to the tag. Once this is done, edit the
-default ```rc.lua``` keybindings to find the position by looping the tags. In
+default `rc.lua` keybindings to find the position by looping the tags. In
 case the tag is not yet created, you can access it with
-```tyrannical.tags_by_name["your tag name"]``` array. This array is
+`tyrannical.tags_by_name["your tag name"]` array. This array is
 automatically generated. You can then add it using
-```awful.tag.add(tyrannical.tags_by_name["your tag
-name"].name,tyrannical.tags_by_name["your tag name"])```. Tyrannical's purpose
-is not to duplicate or change ```awful.tag``` behavior, it is simply a
+`awful.tag.add(tyrannical.tags_by_name["your tag
+name"].name,tyrannical.tags_by_name["your tag name"])`. Tyrannical's purpose
+is not to duplicate or change `awful.tag` behavior, it is simply a
 configuration wrapper.
 
 #### Is it possible to change the layout when adding a new client?
@@ -398,16 +398,16 @@ will allow the client into that tag. This function switch between `tile` and
 `magnifier`:
 
 ```lua
-    local function aero_or_magnifier(c,tag)
-        local count = #match:clients() + 1 --The client is not there yet
-        if count == 2 then
-            awful.layout.set(awful.layout.suit.tile,tag)
-            awful.tag.setproperty(tag,"master_width_factor",0.5)
-        else
-            awful.layout.set(awful.layout.suit.magnifier,tag)
-        end
-        return 5 -- Use a maximum of 5 clients
+local function aero_or_magnifier(c,tag)
+    local count = #match:clients() + 1 --The client is not there yet
+    if count == 2 then
+        awful.layout.set(awful.layout.suit.tile,tag)
+        awful.tag.setproperty(tag,"master_width_factor",0.5)
+    else
+        awful.layout.set(awful.layout.suit.magnifier,tag)
     end
+    return 5 -- Use a maximum of 5 clients
+end
 ```
 
 #### Is it possible to directly launch clients in the current tag or a new one?
@@ -420,51 +420,51 @@ support this. URxvt, Konsole and Gnome terminal does.
 Here are some example:
 
 ```lua
-    -- Spawn in a new tag
-    awful.util.spawn("urxvt",{new_tag=true})
+-- Spawn in a new tag
+awful.util.spawn("urxvt",{new_tag=true})
 
-    -- Or for more advanced use case, you can use a full tag definition too
-    awful.util.spawn("urxvt",{ new_tag= {
-       name = "MyNewTag",
-       exclusive = true,
-    })
+-- Or for more advanced use case, you can use a full tag definition too
+awful.util.spawn("urxvt",{ new_tag= {
+   name = "MyNewTag",
+   exclusive = true,
+})
 
-    -- Spawn in the current tag, floating and on top
-    awful.util.spawn(terminal,{intrusive=true, floating=true, ontop=true})
+-- Spawn in the current tag, floating and on top
+awful.util.spawn(terminal,{intrusive=true, floating=true, ontop=true})
 
-    -- Spawn in an existing tag (assume `my_tag` exist)
-    -- Note that `tag` can also be an array of tags or a function returning
-    -- an array of tags
-    awful.util.spawn(terminal,{tag=my_tag})
+-- Spawn in an existing tag (assume `my_tag` exist)
+-- Note that `tag` can also be an array of tags or a function returning
+-- an array of tags
+awful.util.spawn(terminal,{tag=my_tag})
 ```
 
 For Awesome 3.5.6+, it is possible to replace the default mod4+r keybinding with
 a more powerful one:
 
 ```lua
-    awful.key({ modkey }, "r",
-        function ()
-            awful.prompt.run({ prompt = "Run: ", hooks = {
-                {{         },"Return",function(command)
-                    local result = awful.util.spawn(command)
-                    mypromptbox[mouse.screen].widget:set_text(type(result) == "string" and result or "")
-                    return true
-                end},
-                {{"Mod1"   },"Return",function(command)
-                    local result = awful.util.spawn(command,{intrusive=true})
-                    mypromptbox[mouse.screen].widget:set_text(type(result) == "string" and result or "")
-                    return true
-                end},
-                {{"Shift"  },"Return",function(command)
-                    local result = awful.util.spawn(command,{intrusive=true,ontop=true,floating=true})
-                    mypromptbox[mouse.screen].widget:set_text(type(result) == "string" and result or "")
-                    return true
-                end}
-            }},
-            mypromptbox[mouse.screen].widget,nil,
-            awful.completion.shell,
-            awful.util.getdir("cache") .. "/history")
-        end),
+awful.key({ modkey }, "r",
+    function ()
+        awful.prompt.run({ prompt = "Run: ", hooks = {
+            {{         },"Return",function(command)
+                local result = awful.util.spawn(command)
+                mypromptbox[mouse.screen].widget:set_text(type(result) == "string" and result or "")
+                return true
+            end},
+            {{"Mod1"   },"Return",function(command)
+                local result = awful.util.spawn(command,{intrusive=true})
+                mypromptbox[mouse.screen].widget:set_text(type(result) == "string" and result or "")
+                return true
+            end},
+            {{"Shift"  },"Return",function(command)
+                local result = awful.util.spawn(command,{intrusive=true,ontop=true,floating=true})
+                mypromptbox[mouse.screen].widget:set_text(type(result) == "string" and result or "")
+                return true
+            end}
+        }},
+        mypromptbox[mouse.screen].widget,nil,
+        awful.completion.shell,
+        awful.util.getdir("cache") .. "/history")
+    end),
 ```
 
 When using this, instead of pressing `Return` to spawn the application, you can
@@ -486,13 +486,13 @@ Yes, but not directly. You need to create a new `awful.rule` that overrides the 
 
 ```lua
 awful.rules.rules = {
-    --default stuff here,
-    {
-        rule = { class = "URxvt", name = "dev"  },
-        callback = function(c)
-        awful.client.property.set(c, "overwrite_class", "urxvt:dev")
-        end
-    }
+--default stuff here,
+{
+    rule = { class = "URxvt", name = "dev"  },
+    callback = function(c)
+    awful.client.property.set(c, "overwrite_class", "urxvt:dev")
+    end
+}
 }
 ```
 This example changes the class of URxvt with name "dev" from "urxvt" to "urxvt:dev" which then can be matched to a tag.
