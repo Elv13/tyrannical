@@ -401,10 +401,10 @@ will allow the client into that tag. This function switch between `tile` and
 local function aero_or_magnifier(c,tag)
     local count = #match:clients() + 1 --The client is not there yet
     if count == 2 then
-        awful.layout.set(awful.layout.suit.tile,tag)
-        awful.tag.setproperty(tag,"master_width_factor",0.5)
+        tag.layout = awful.layout.suit.tile
+        tag.master_width_factor = 0.5
     else
-        awful.layout.set(awful.layout.suit.magnifier,tag)
+        tag.layout = awful.layout.suit.magnifier
     end
     return 5 -- Use a maximum of 5 clients
 end
@@ -490,7 +490,7 @@ awful.rules.rules = {
 {
     rule = { class = "URxvt", name = "dev"  },
     callback = function(c)
-    awful.client.property.set(c, "overwrite_class", "urxvt:dev")
+        c.overwrite_class = "urxvt:dev"
     end
 }
 }
