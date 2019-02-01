@@ -17,7 +17,7 @@ implementation will be released shortly after Awesome 3.6 is released.
 Tyrannical goal is and has always been to avoid re-inventing the wheel and
 use existing Awesome APIs to manage tags. This will now get much easier with
 Awesome 3.6 and a new "request" API designed with Tyrannical like workflows
-in mind. This will avoid turning the code into a unreadable ball of spagatti
+in mind. This will avoid turning the code into a unreadable ball of spagetti
 as the current implementation became.
 
 ### Description
@@ -47,9 +47,9 @@ While I am among the first AwesomeWM user, I only became a major contributor
 during the 4.0 development cycle. The new version of Awesome has new APIs
 designed to improve alternate workflows such as the one proposed by Tyrannical.
 
-The new version aim to rewrite Tyrannical to use these APIs instead of the
+The new version aims to rewrite Tyrannical to use these APIs instead of the
 hacks that allowed the original version to work. The original code also became
-maintainable due to horrible coding practices and repeated hacks to fine tune
+unmaintainable due to horrible coding practices and repeated hacks to fine tune
 its behavior.
 
 Finally, Awesome 4.0 introduces support for adding and removing screen at
