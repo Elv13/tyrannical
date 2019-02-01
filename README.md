@@ -126,6 +126,10 @@ Similar to `no_focus_stealing_in`. If a tag enable this, then the tag will stay
 selected no matter what event happen. This is useful for video games and video
 players.
 
+**no_tag_deselect:**
+When a new client is added somewhere, that tag gets selected in addition to the
+current selection of tags instead of being selected solely.
+
 **no_autofocus:**
 When a class has this flag, then new clients wont be focused when they are
 launched. This is useful for download managers or background terminals tasks.
@@ -277,6 +281,7 @@ Then edit this section to fit your needs.
 | **master_count**          | Number of master clients                             | number           |
 | **no_focus_stealing_in**  | Do not select this tag when a new client is added    | boolean          |
 | **no_focus_stealing_out** | Do not unselect when a new client is added elsewhere | boolean          |
+| **no_tag_deselect**       | Do not unselect other tags spawning/selecting this   | boolean          |
 | **screen**                | Tag screen(s)                                        | number or array  |
 | **selected**              | Select when created                                  | boolean          |
 | **volatile**              | Destroy when the last client is closed               | boolean          |

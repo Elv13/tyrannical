@@ -114,7 +114,12 @@ function module.focus_client(c,properties)
         local tags = c:tags()
 
         if #tags > 0 and not has_selected(tags, c.screen) and not tags[1].no_focus_stealing_in then
-            c:tags()[1]:view_only()
+            local t = c:tags()[1]
+            if t.no_tag_deselect then
+                t.selected = true
+            else
+                t:view_only()
+            end
         end
 
         capi.client.focus = c
