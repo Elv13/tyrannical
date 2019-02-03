@@ -1,6 +1,6 @@
 local capi      = {root=root,client=client,tag=tag,mouse=mouse}
 local ipairs    = ipairs
-local unpack    = unpack
+local unpack    = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 local aw_util   = require( "awful.util"   )
 local aw_spawn  = require( "awful.spawn"  )
 local aw_tag    = require( "awful.tag"    )
