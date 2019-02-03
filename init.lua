@@ -368,23 +368,7 @@ capi.tag.connect_signal("request::screen", function(t)
     end
 end)
 
-capi.client.disconnect_signal("manage", awful.rules.apply)
-capi.client.disconnect_signal("spawn::completed_with_payload", awful.rules.completed_with_payload_callback)
-capi.client.disconnect_signal("manage",awful.spawn.on_snid_callback)
-
---- Replace the default handler to take into account Tyrannical properties
-function awful.rules.apply(c)
-    local callbacks, props = {}, {}
-
-    -- Add the rules properties
-    for _, entry in ipairs(awful.rules.matching_rules(c, awful.rules.rules)) do
-        awful.util.table.crush(props,entry.properties or {})
-
-        if entry.callback then
-            table.insert(callbacks, entry.callback)
-        end
-    end
-
+local function apply_tyrannical_rules(c, props, callbacks)
     -- In case the class is overwriten
     local low_c = props.overwrite_class or string.lower(get_class(c))
     local low_i = string.lower(c.instance or "N/A")
@@ -395,24 +379,11 @@ function awful.rules.apply(c)
         or {}
 
     awful.util.table.crush(props,props_src)
-
-    -- Add startup_id overridden properties
-    if c.startup_id and awful.spawn.snid_buffer[c.startup_id] then
-        local snprops, sncb = unpack(awful.spawn.snid_buffer[c.startup_id])
-
-        -- The SNID tag(s) always have precedence over the rules one(s)
-        if snprops.tag or snprops.tags or snprops.new_tag then
-            props.tag, props.tags, props.new_tag, props.intrusive = nil, nil, nil, false
-        end
-
-        awful.util.table.crush(props,snprops)
-        awful.util.table.merge(callbacks, sncb)
-    end
-
-    apply_properties(c,props, callbacks)
 end
 
-capi.client.connect_signal("manage", awful.rules.apply)
+awful.rules.add_rule_source(
+    "tyrannical", apply_tyrannical_rules, {"snid", "awful.spawn"}, {"awful.rules"}
+)
 
 capi.client.disconnect_signal("request::activate",awful.ewmh.activate)
 capi.client.connect_signal("request::activate",function(c,reason)
@@ -429,7 +400,6 @@ capi.client.connect_signal("request::activate",function(c,reason)
         c:raise()
     end
 end)
-
 
 --------------------------OBJECT GEARS---------------------------
 local getter = {properties   = setmetatable({}, {__newindex = function(table,k,v) load_property(k,v) end}),
