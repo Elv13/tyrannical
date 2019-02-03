@@ -3,22 +3,31 @@ Tyrannical—A simple tag managment engine for Awesome
 
 ### News
 
-#### December 2016
+#### January 2019
 
-The master branch **is for Awesome 4.0+**. If you use **Awesome 3.5,**
-**use the 1.0.0 version**
+Tyrannical 2.0.0 has been released. It is the first and last official release
+for Awesome 4.0 to 4.2. The new `no_tag_deselect` option has been added (
+thanks to @cherti).
+
+From now on, only AwesomeWM 4.3+ is supported. Parts of Tyrannical were merged
+into AwesomeWM 4.3 and it will make everything more reliable.
 
 #### April 2016
 
 Tyrannical 1.0.0 has been released. This is the first and last version for
 Awesome 3.5. Tyrannical is still in active developement and a brand new
-implementation will be released shortly after Awesome 3.6 is released.
+implementation will be released shortly after Awesome 4.0 is released.
 
 Tyrannical goal is and has always been to avoid re-inventing the wheel and
 use existing Awesome APIs to manage tags. This will now get much easier with
-Awesome 3.6 and a new "request" API designed with Tyrannical like workflows
+Awesome 4.0 and a new "request" API designed with Tyrannical like workflows
 in mind. This will avoid turning the code into a unreadable ball of spagetti
 as the current implementation became.
+
+#### December 2016
+
+The master branch **is for Awesome 4.4+**. If you use **Awesome 3.5,**
+**use the 1.0.0 version**. If you use Awesome 4.0-2.4, use the 2.0.0 version.
 
 ### Description
 
@@ -357,6 +366,7 @@ to do otherwise.
 
 ### FAQ
 
+ * [Is Tyrannical under active development](https://github.com/Elv13/tyrannical#is-tyrannical-under-active-development)
  * [Is it possible to add, remove and move tags?](https://github.com/Elv13/tyrannical#is-it-possible-to-add-remove-and-move-tags)
  * [How do I get a client class?](https://github.com/Elv13/tyrannical#how-do-i-get-a-client-class)
  * [Is it possible to have relative indexes (position) for tags?](https://github.com/Elv13/tyrannical#is-it-possible-to-have-relative-indexes-position-for-tags)
@@ -364,6 +374,15 @@ to do otherwise.
  * [Is it possible to directly launch clients in the current tag or a new one?](https://github.com/Elv13/tyrannical#is-it-possible-to-directly-launch-clients-in-the-current-tag-or-a-new-one)
  * [Can I alter the client properties based on runtime criterias?](https://github.com/Elv13/tyrannical#can-i-alter-the-client-properties-based-on-runtime-criterias)
  * [Is it possible to match clients based on properties other than class or instance?](https://github.com/Elv13/tyrannical#is-it-possible-to-match-clients-based-on-properties-other-than-class-or-instance)
+
+#### Is Tyrannical under active development
+
+Yes.
+
+Note that the Tyrannical feature set is complete and the scope isn't likely to
+be expanded. The new features, if any, are intended to refining the current
+algorithm. Parts by part, Tyrannical features are upstreamed into Awesome itself
+and it is where the main development is happening.
 
 #### Is it possible to add, remove and move tags?
 
